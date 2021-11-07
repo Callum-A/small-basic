@@ -11,14 +11,14 @@ char *duplicateSegment(const char* token, int token_length);
     yylval.number = atoi(yytext); 
     return NUMBER;
 }
-[\t\n ] ;
+[\t ] ;
 "+" return(PLUS);
 "-" return(MINUS);
 "*" return(TIMES);
 "/" return(DIVIDE);
 "(" return(LEFT_PAREN);
 ")" return(RIGHT_PAREN);
-";" return(END);
+"\n" return(END);
 "=" return EQUALS;
 "==" return EQUALS_EQUALS;
 "<" return LESS_THAN;
