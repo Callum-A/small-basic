@@ -104,24 +104,44 @@ bool isTruthy(Value *v) {
     return true;
 }
 
-Value *evBinaryOp(BinaryOpNode *binaryOp) {
-    Value *left = ev(binaryOp->left);
-    Value *right = ev(binaryOp->right);
-
-    // TODO: error here for types
+Value *evStringBinaryOp(BinaryOpNode *binaryOp, Value *left, Value *right) {
+    if (right->type != VAL_STRING) {
+        return new ErrorValue(binaryOp->lineNum, "Expected string for right operand as left is string.");
+    }
+    StringValue *strLeft = dynamic_cast<StringValue*>(left);
+    StringValue *strRight = dynamic_cast<StringValue*>(right);
+    char *newStr = (char *)malloc(strlen(strLeft->string) + strlen(strRight->string) + 1);
+    strcpy(newStr, strLeft->string);
+    strcat(newStr, strRight->string);
     switch (binaryOp->op) {
         case '+':
-            // TODO: support string concat
+            return new StringValue(newStr);
+        case 'E': // ==
+            return new BoolValue(isEqual(left, right));
+        case 'A': // and
+            return new BoolValue(isTruthy(left) && isTruthy(right));
+        case 'O':
+            return new BoolValue(isTruthy(left) || isTruthy(right));
+        default:
+            return new ErrorValue(binaryOp->lineNum, "Unsupported operator between strings!");
+    }
+}
+
+Value *evNumberBinaryOp(BinaryOpNode *binaryOp, Value *left, Value *right) {
+    if (right->type != VAL_NUMBER) {
+        return new ErrorValue(binaryOp->lineNum, "Expected number for right operand as left is number.");
+    }
+
+    switch (binaryOp->op) {
+        case '+':
             return new NumberValue(dynamic_cast<NumberValue*>(left)->number + dynamic_cast<NumberValue*>(right)->number);
         case '-':
-            // TODO: check if numbers for these below
             return new NumberValue(dynamic_cast<NumberValue*>(left)->number - dynamic_cast<NumberValue*>(right)->number);
         case '*':
             return new NumberValue(dynamic_cast<NumberValue*>(left)->number * dynamic_cast<NumberValue*>(right)->number);
         case '/':
             return new NumberValue(dynamic_cast<NumberValue*>(left)->number / dynamic_cast<NumberValue*>(right)->number);
         case '<':
-            // TODO: ensure numbers
             return new BoolValue(dynamic_cast<NumberValue*>(left)->number < dynamic_cast<NumberValue*>(right)->number);
         case '>':
             return new BoolValue(dynamic_cast<NumberValue*>(left)->number > dynamic_cast<NumberValue*>(right)->number);
@@ -136,22 +156,43 @@ Value *evBinaryOp(BinaryOpNode *binaryOp) {
         case 'O':
             return new BoolValue(isTruthy(left) || isTruthy(right));
         default:
-            std::cout << "UNRECOGNISED OP " << binaryOp->op << std::endl;
-            break;
+            return new ErrorValue(binaryOp->lineNum, "Unsupported operator between numbers!");
     }
+}
 
-    return NULL;
+Value *evBinaryOp(BinaryOpNode *binaryOp) {
+    Value *left = ev(binaryOp->left);
+    Value *right = ev(binaryOp->right);
+
+    if (left->type == VAL_STRING) {
+        return evStringBinaryOp(binaryOp, left, right);
+    } else if (left->type == VAL_NUMBER) {
+        return evNumberBinaryOp(binaryOp, left, right);
+    } else {
+        switch (binaryOp->op) {
+            case 'E': // ==
+                return new BoolValue(isEqual(left, right));
+            case 'A': // and
+                return new BoolValue(isTruthy(left) && isTruthy(right));
+            case 'O':
+                return new BoolValue(isTruthy(left) || isTruthy(right));
+            default:
+                return new ErrorValue(binaryOp->lineNum, "Unrecognised binary operator!");
+        }
+    }
 }
 
 Value *evUnaryOp(UnaryOpNode *unaryOp) {
     Value *right = ev(unaryOp->right);
-    // TODO: check type
+    if (right->type != VAL_NUMBER) {
+        return new ErrorValue(unaryOp->lineNum, "Unary operators only support numbers!");
+    }
+
     switch (unaryOp->op) {
         case '-':
             return new NumberValue(-(dynamic_cast<NumberValue*>(right)->number));
         default:
-            std::cout << "UNRECOGNISED OP " << unaryOp->op << std::endl;
-            break;
+            return new ErrorValue(unaryOp->lineNum, "Unrecognised unary operator!");
     }
 
     return NULL;
@@ -160,6 +201,9 @@ Value *evUnaryOp(UnaryOpNode *unaryOp) {
 Value *evVarDecl(VarDeclNode *varDecl) {
     std::string ident = dynamic_cast<IdentifierNode*>(varDecl->ident)->ident;
     Value *v = ev(varDecl->value);
+    if (v != NULL && v->type == VAL_ERROR) {
+        return v;
+    }
     // TODO: check if ident already exists and error
     env[ident] = v;
     return NULL;
@@ -169,6 +213,9 @@ Value *evVarAssign(VarAssignNode *varAssign) {
     std::string ident = dynamic_cast<IdentifierNode*>(varAssign->ident)->ident;
     // TODO: check if var exists
     Value *v = ev(varAssign->value);
+    if (v != NULL && v->type == VAL_ERROR) {
+        return v;
+    }
     env[ident] = v;
     
     return NULL;

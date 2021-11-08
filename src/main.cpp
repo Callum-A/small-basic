@@ -11,6 +11,9 @@ std::map<std::string, Value*> env;
 int main(void) {
     yyparse();
     ProgramNode *prog = dynamic_cast<ProgramNode*>(root);
-    ev(prog);
+    Value *v = ev(prog);
+    if (v != NULL && v->type == VAL_ERROR) {
+        std::cout << v->stringify() << std::endl;
+    }
     return 0;
 }

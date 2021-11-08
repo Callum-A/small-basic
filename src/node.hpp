@@ -30,11 +30,13 @@ class Node {
 public:
     NodeType type;
     char *token;
+    int lineNum;
 
-    Node(NodeType type, const char *token) {
+    Node(NodeType type, const char *token, int lineNum) {
         this->type = type;
         this->token = (char *)malloc(strlen(token) + 1);
         strcpy(this->token, token);
+        this->lineNum = lineNum;
     }
 
     virtual void f() {}
@@ -42,7 +44,7 @@ public:
 
 class ProgramNode : public Node {
 public:
-    ProgramNode(const char *token) : Node(NODE_PROGRAM, token) {
+    ProgramNode(const char *token) : Node(NODE_PROGRAM, token, 0) {
     }
 
     void addNode(Node *node) { 
@@ -58,7 +60,7 @@ class NumberNode : public Node {
 public:
     NumberValue *value;
 
-    NumberNode(double value, const char *token) : Node(NODE_NUMBER, token) {
+    NumberNode(double value, const char *token, int lineNum) : Node(NODE_NUMBER, token, lineNum) {
         this->value = new NumberValue(value);
     }
 };
@@ -67,7 +69,7 @@ class BooleanNode : public Node {
 public:
     BoolValue *value;
 
-    BooleanNode(bool value, const char *token) : Node(NODE_BOOLEAN, token) {
+    BooleanNode(bool value, const char *token, int lineNum) : Node(NODE_BOOLEAN, token, lineNum) {
         this->value = new BoolValue(value);
     }
 };
@@ -76,7 +78,7 @@ class StringNode : public Node {
 public:
     StringValue *value;
 
-    StringNode(char *value, const char *token) : Node(NODE_STRING, token) {
+    StringNode(char *value, const char *token, int lineNum) : Node(NODE_STRING, token, lineNum) {
         this->value = new StringValue(value);
     }
 };
@@ -85,7 +87,7 @@ class IdentifierNode : public Node {
 public:
     char *ident;
 
-    IdentifierNode(char *ident, const char *token) : Node(NODE_IDENTIFIER, token) {
+    IdentifierNode(char *ident, const char *token, int lineNum) : Node(NODE_IDENTIFIER, token, lineNum) {
         this->ident = (char *)malloc(strlen(ident) + 1);
         strcpy(this->ident, ident);
     }
@@ -95,7 +97,7 @@ class PrintNode : public Node {
 public:
     Node *exp;
 
-    PrintNode(Node *exp, const char *token) : Node(NODE_PRINT, token) {
+    PrintNode(Node *exp, const char *token, int lineNum) : Node(NODE_PRINT, token, lineNum) {
         this->exp = exp;
     }
 };
@@ -106,7 +108,7 @@ public:
     Node *left;
     Node *right;
 
-    BinaryOpNode(Node *left, Node *right, char op, const char *token) : Node(NODE_BINARY_OP, token) {
+    BinaryOpNode(Node *left, Node *right, char op, const char *token, int lineNum) : Node(NODE_BINARY_OP, token, lineNum) {
         this->op = op;
         this->left = left;
         this->right = right;
@@ -118,7 +120,7 @@ public:
     char op;
     Node *right;
 
-    UnaryOpNode(Node *right, char op, const char *token) : Node(NODE_UNARY_OP, token) {
+    UnaryOpNode(Node *right, char op, const char *token, int lineNum) : Node(NODE_UNARY_OP, token, lineNum) {
         this->op = op;
         this->right = right;
     }
@@ -129,7 +131,7 @@ public:
     Node *ident;
     Node *value;
 
-    VarDeclNode(Node *ident, Node *value, const char *token) : Node(NODE_VAR_DECL, token) {
+    VarDeclNode(Node *ident, Node *value, const char *token, int lineNum) : Node(NODE_VAR_DECL, token, lineNum) {
         this->ident = ident;
         this->value = value;
     }
@@ -140,7 +142,7 @@ public:
     Node *ident;
     Node *value;
 
-    VarAssignNode(Node *ident, Node *value, const char *token) : Node(NODE_VAR_ASSIGN, token) {
+    VarAssignNode(Node *ident, Node *value, const char *token, int lineNum) : Node(NODE_VAR_ASSIGN, token, lineNum) {
         this->ident = ident;
         this->value = value;
     }
@@ -148,7 +150,7 @@ public:
 
 class BlockNode : public Node {
 public:
-    BlockNode(const char *token) : Node(NODE_BLOCK, token) {}
+    BlockNode(const char *token, int lineNum) : Node(NODE_BLOCK, token, lineNum) {}
 
     void addNode(Node *node) { 
         stmts.push_back(node);
@@ -165,7 +167,7 @@ public:
     Node *thenBranch;
     Node *elseBranch;
 
-    IfNode(Node *expr, Node *thenBranch, Node *elseBranch, const char *token) : Node(NODE_IF, token) {
+    IfNode(Node *expr, Node *thenBranch, Node *elseBranch, const char *token, int lineNum) : Node(NODE_IF, token, lineNum) {
         this->expr = expr;
         this->thenBranch = thenBranch;
         this->elseBranch = elseBranch;
@@ -177,7 +179,7 @@ public:
     Node *expr;
     Node *block;
 
-    WhileNode(Node *expr, Node *block, const char *token) : Node(NODE_WHILE, token) {
+    WhileNode(Node *expr, Node *block, const char *token, int lineNum) : Node(NODE_WHILE, token, lineNum) {
         this->expr = expr;
         this->block = block;
     }
@@ -191,7 +193,7 @@ public:
     Node *step;
     Node *block;
 
-    ForNode(Node *ident, Node *value, Node *max, Node *step, Node *block, const char *token) : Node(NODE_FOR, token) {
+    ForNode(Node *ident, Node *value, Node *max, Node *step, Node *block, const char *token, int lineNum) : Node(NODE_FOR, token, lineNum) {
         this->ident = ident;
         this->value = value;
         this->max = max;
@@ -205,7 +207,7 @@ public:
     Node *ident;
     Node *block;
 
-    SubNode(Node *ident, Node *block, const char *token) : Node(NODE_SUB, token) {
+    SubNode(Node *ident, Node *block, const char *token, int lineNum) : Node(NODE_SUB, token, lineNum) {
         this->ident = ident;
         this->block = block;
     }
@@ -215,7 +217,7 @@ class CallNode : public Node {
 public:
     Node *ident;
 
-    CallNode(Node *ident, const char *token) : Node(NODE_CALL, token) {
+    CallNode(Node *ident, const char *token, int lineNum) : Node(NODE_CALL, token, lineNum) {
         this->ident = ident;
     }
 };

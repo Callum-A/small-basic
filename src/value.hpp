@@ -21,7 +21,7 @@ public:
 
     virtual void f() {}
 
-    virtual char *stringify() { return ""; }
+    virtual const char *stringify() { return ""; }
 };
 
 class NumberValue : public Value {
@@ -32,7 +32,7 @@ public:
         this->number = number;
     }
 
-    char *stringify() override {
+    const char *stringify() override {
         std::string t = std::to_string(number);
         char *str = (char *)malloc(t.size() + 1);
         strcpy(str, t.c_str());
@@ -48,7 +48,7 @@ public:
         this->boolean = boolean;
     }
 
-    char *stringify() override {
+    const char *stringify() override {
         if (boolean) {
             return "true";
         } else {
@@ -66,7 +66,7 @@ public:
         strcpy(this->string, string);
     }
 
-    char *stringify() override {
+    const char *stringify() override {
         // May have to strcpy
         return string;
     }
@@ -75,9 +75,18 @@ public:
 class ErrorValue : public Value {
 public:
     char *error;
+    int lineNum;
 
-    ErrorValue(char *error) : Value(VAL_ERROR) {
+    ErrorValue(int lineNum, char *error) : Value(VAL_ERROR) {
+        this->lineNum = lineNum;
         this->error = (char *)malloc(strlen(error) + 1);
         strcpy(this->error, error);
+    }
+
+    const char *stringify() override {
+        std::string errPrelude = "ERROR AT LINE " + std::to_string(this->lineNum);
+        std::string err = errPrelude + ": " + this->error;
+        const char *str = err.c_str();
+        return str;
     }
 };
