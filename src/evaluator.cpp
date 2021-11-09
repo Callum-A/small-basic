@@ -278,19 +278,34 @@ Value *evFor(ForNode *forNode) {
     std::string ident = identNode->ident;
     // TODO: check types
     Value *v = ev(forNode->value);
+    if (v->type != VAL_NUMBER) {
+        return new ErrorValue(forNode->lineNum, "For initialiser must be a number!");
+    }
     env[ident] = v;
     Value *max = ev(forNode->max);
+    if (max->type != VAL_NUMBER) {
+        return new ErrorValue(forNode->lineNum, "For maximum must be a number!");
+    }
     NumberValue *v2 = dynamic_cast<NumberValue*>(v);
     NumberValue *max2 = dynamic_cast<NumberValue*>(max);
     if (forNode->step != NULL) {
         Value *step = ev(forNode->step);
+        if (step->type != VAL_NUMBER) {
+            return new ErrorValue(forNode->lineNum, "For step must be a number!");
+        }
         NumberValue *step2 = dynamic_cast<NumberValue*>(step);
         for (v2->number; v2->number < max2->number; v2->number = v2->number + step2->number) {
-            ev(forNode->block);
+            Value *v = ev(forNode->block);
+            if (isError(v)) {
+                return v;
+            }
         }
     } else {
         for (v2->number; v2->number < max2->number; v2->number++) {
-            ev(forNode->block);
+            Value *v = ev(forNode->block);
+            if (isError(v)) {
+                return v;
+            }
         }
     }
 
