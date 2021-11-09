@@ -2,7 +2,7 @@
 #include "node.hpp"
 int yylex();
 int yyerror(char *s);
-extern int lines;
+int lines = 1;
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -43,17 +43,17 @@ extern Node *root;
 program: stmts;
 
 stmts: { $$ = new ProgramNode("PROG"); root = $$; }
-    | stmts stmt { (dynamic_cast<ProgramNode*>($1))->addNode($2); }
+    | stmts stmt end { (dynamic_cast<ProgramNode*>($1))->addNode($2); }
     ;
 
-stmt: var_decl_stmt END { $$ = $1; }
-    | print_stmt END { $$ = $1; }
-    | assign_stmt END { $$ = $1; }
-    | if_stmt END { $$ = $1; }
-    | while_stmt END { $$ = $1; }
-    | for_stmt END { $$ = $1; }
-    | sub_stmt END { $$ = $1; }
-    | call_stmt END { $$ = $1; }
+stmt: var_decl_stmt { $$ = $1; }
+    | print_stmt { $$ = $1; }
+    | assign_stmt { $$ = $1; }
+    | if_stmt { $$ = $1; }
+    | while_stmt { $$ = $1; }
+    | for_stmt { $$ = $1; }
+    | sub_stmt { $$ = $1; }
+    | call_stmt { $$ = $1; }
     ;
 
 call_stmt: ident LEFT_PAREN RIGHT_PAREN { $$ = new CallNode($1, "CALL", lines); }
@@ -129,13 +129,16 @@ term: factor { $$ = $1; }
     ;
 
 factor: NUMBER { $$ = new NumberNode(yylval.number, "NUM", lines); }
-    | ident { $$ = new IdentifierNode(yylval.string, "IDENT", lines); }
+    | ident { $$ = $1; }
     | STRING { $$ = new StringNode(yylval.string, "STRING", lines); }
     | TRUE { $$ = new BooleanNode(true, "true", lines); }
     | FALSE { $$ = new BooleanNode(false, "false", lines); }
     | LEFT_PAREN expr RIGHT_PAREN { $$ = $2; }
     | MINUS expr %prec U_MINUS { $$ = new UnaryOpNode($2, '-', "UNARY", lines); }
     | ident LEFT_PAREN RIGHT_PAREN { $$ = new CallNode($1, "CALL", lines); }
+    ;
+
+end: END { lines++; }
     ;
 
 %%

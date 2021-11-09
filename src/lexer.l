@@ -5,7 +5,6 @@
 #include <cstring>
 int yyerror(char *s);
 char *duplicateSegment(const char* token, int token_length);
-int lines = 0;
 %}
 %%
 [0-9]+ {
@@ -20,7 +19,6 @@ int lines = 0;
 "(" return LEFT_PAREN;
 ")" return RIGHT_PAREN;
 "\n" {
-    lines++;
     return END;
 }
 "=" return EQUALS;
