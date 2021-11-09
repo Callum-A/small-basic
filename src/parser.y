@@ -31,7 +31,7 @@ extern Node *root;
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right U_MINUS
-%type<node> program stmts stmt print_stmt var_decl_stmt assign_stmt expr term factor ident conditional_expr or_expr and_expr equality_expr relational_expr add_expr if_stmt matched_if_stmt block_stmt unmatched_if_stmt while_stmt for_stmt sub_stmt call_stmt
+%type<node> program stmts stmt print_stmt assign_stmt expr term factor ident conditional_expr or_expr and_expr equality_expr relational_expr add_expr if_stmt block_stmt unmatched_if_stmt matched_if_stmt while_stmt for_stmt sub_stmt call_stmt
 %type<number> NUMBER
 %type<string> STRING
 %type<string> IDENT
@@ -46,8 +46,7 @@ stmts: { $$ = new ProgramNode("PROG"); root = $$; }
     | stmts stmt { (dynamic_cast<ProgramNode*>($1))->addNode($2); }
     ;
 
-stmt: var_decl_stmt end { $$ = $1; }
-    | print_stmt end { $$ = $1; }
+stmt: print_stmt end { $$ = $1; }
     | assign_stmt end { $$ = $1; }
     | if_stmt end { $$ = $1; }
     | while_stmt end { $$ = $1; }
@@ -80,11 +79,8 @@ if_stmt: unmatched_if_stmt { $$ = $1; }
 unmatched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt END_IF %prec IF_UNMAT { $$ = new IfNode($3, $7, NULL, "IF", lines); }
     ;
 
-matched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt ELSE block_stmt END_IF { $$ = new IfNode($3, $7, $9, "IF", lines); }
+matched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt ELSE end block_stmt END_IF { $$ = new IfNode($3, $7, $10, "IF", lines); printf("making if"); }
     | IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt ELSE if_stmt { $$ = new IfNode($3, $7, $9, "IF", lines); }
-    ;
-
-var_decl_stmt: VAR ident EQUALS expr { $$ = new VarDeclNode($2, $4, "DECL", lines); };
     ;
 
 assign_stmt: ident EQUALS expr { $$ = new VarAssignNode($1, $3, "ASSIGN", lines); };

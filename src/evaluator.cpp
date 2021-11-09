@@ -8,7 +8,6 @@ Value *evProgram(ProgramNode *program);
 Value *evPrint(PrintNode *print);
 Value *evBinaryOp(BinaryOpNode *binaryOp);
 Value *evUnaryOp(UnaryOpNode *unaryOp);
-Value *evVarDecl(VarDeclNode *varDecl);
 Value *evVarAssign(VarAssignNode *varAssign);
 Value *evIdentifier(IdentifierNode *identifier);
 Value *evIf(IfNode *ifNode);
@@ -17,6 +16,14 @@ Value *evWhile(WhileNode *whileNode);
 Value *evFor(ForNode *forNode);
 Value *evSub(SubNode *subNode);
 Value *evCall(CallNode *callNode);
+
+bool isError(Value *v) {
+    if (v != NULL && v->type == VAL_ERROR) {
+        return true;
+    }
+
+    return false;
+}
 
 Value *ev(Node *root) {
     switch (root->type) {
@@ -32,8 +39,6 @@ Value *ev(Node *root) {
             return evBinaryOp(dynamic_cast<BinaryOpNode*>(root));
         case NODE_UNARY_OP:
             return evUnaryOp(dynamic_cast<UnaryOpNode*>(root));
-        case NODE_VAR_DECL:
-            return evVarDecl(dynamic_cast<VarDeclNode*>(root));
         case NODE_VAR_ASSIGN:
             return evVarAssign(dynamic_cast<VarAssignNode*>(root));
         case NODE_IDENTIFIER:
@@ -64,7 +69,7 @@ Value *evProgram(ProgramNode *program) {
     for (int i = 0; i < stmts->size(); i++) {
         Node *node = (*stmts)[i];
         Value *curr = ev(node);
-        if (curr != NULL && curr->type == VAL_ERROR) {
+        if (isError(curr)) {
             return curr;
         }
     }
@@ -73,6 +78,9 @@ Value *evProgram(ProgramNode *program) {
 
 Value *evPrint(PrintNode *print) {
     Value *val = ev(print->exp);
+    if (isError(val)) {
+        return val;
+    }
     std::cout << val->stringify() << std::endl;
     return NULL;
 }
@@ -164,6 +172,14 @@ Value *evBinaryOp(BinaryOpNode *binaryOp) {
     Value *left = ev(binaryOp->left);
     Value *right = ev(binaryOp->right);
 
+    if (isError(left)) {
+        return left;
+    }
+
+    if (isError(right)) {
+        return right;
+    }
+
     if (left->type == VAL_STRING) {
         return evStringBinaryOp(binaryOp, left, right);
     } else if (left->type == VAL_NUMBER) {
@@ -198,22 +214,10 @@ Value *evUnaryOp(UnaryOpNode *unaryOp) {
     return NULL;
 }
 
-Value *evVarDecl(VarDeclNode *varDecl) {
-    std::string ident = dynamic_cast<IdentifierNode*>(varDecl->ident)->ident;
-    Value *v = ev(varDecl->value);
-    if (v != NULL && v->type == VAL_ERROR) {
-        return v;
-    }
-    // TODO: check if ident already exists and error
-    env[ident] = v;
-    return NULL;
-}
-
 Value *evVarAssign(VarAssignNode *varAssign) {
     std::string ident = dynamic_cast<IdentifierNode*>(varAssign->ident)->ident;
-    // TODO: check if var exists
     Value *v = ev(varAssign->value);
-    if (v != NULL && v->type == VAL_ERROR) {
+    if (isError(v)) {
         return v;
     }
     env[ident] = v;
@@ -224,18 +228,26 @@ Value *evVarAssign(VarAssignNode *varAssign) {
 Value *evIdentifier(IdentifierNode *identifier) {
     std::string ident = identifier->ident;
     // TODO: error if var does not exist
+    if (env.find(ident) == env.end()) {
+        return new ErrorValue(identifier->lineNum, "Unrecognised variable!");
+    }
     Value *v = env[ident];
     return v;
 }
 
 Value *evIf(IfNode *ifNode) {
+    Value *v = NULL;
     if (isTruthy(ev(ifNode->expr))) {
-        ev(ifNode->thenBranch);
+        v = ev(ifNode->thenBranch);
     } else {
         if (ifNode->elseBranch != NULL) {
-            ev(ifNode->elseBranch);
+            v = ev(ifNode->elseBranch);
         }
     }
+    if (isError(v)) {
+        return v;
+    }
+
     return NULL;
 }
 
@@ -243,14 +255,20 @@ Value *evBlock(BlockNode *block) {
     std::vector<Node*> *stmts = block->getStmts();
     for (int i = 0; i < stmts->size(); i++) {
         Node *stmt = (*stmts)[i];
-        ev(stmt);
+        Value *v = ev(stmt);
+        if (isError(v)) {
+            return v;
+        }
     }
     return NULL;
 }
 
 Value *evWhile(WhileNode *whileNode) {
     while(isTruthy(ev(whileNode->expr))) {
-        ev(whileNode->block);
+        Value *v = ev(whileNode->block);
+        if (isError(v)) {
+            return v;
+        }
     }
     return NULL;
 }
