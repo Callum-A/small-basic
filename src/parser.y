@@ -79,7 +79,7 @@ if_stmt: unmatched_if_stmt { $$ = $1; }
 unmatched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt END_IF %prec IF_UNMAT { $$ = new IfNode($3, $7, NULL, "IF", lines); }
     ;
 
-matched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt ELSE end block_stmt END_IF { $$ = new IfNode($3, $7, $10, "IF", lines); printf("making if"); }
+matched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt ELSE end block_stmt END_IF { $$ = new IfNode($3, $7, $10, "IF", lines); }
     | IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt ELSE if_stmt { $$ = new IfNode($3, $7, $9, "IF", lines); }
     ;
 
@@ -131,7 +131,6 @@ factor: NUMBER { $$ = new NumberNode(yylval.number, "NUM", lines); }
     | FALSE { $$ = new BooleanNode(false, "false", lines); }
     | LEFT_PAREN expr RIGHT_PAREN { $$ = $2; }
     | MINUS expr %prec U_MINUS { $$ = new UnaryOpNode($2, '-', "UNARY", lines); }
-    | ident LEFT_PAREN RIGHT_PAREN { $$ = new CallNode($1, "CALL", lines); }
     ;
 
 end: END { lines++; }
