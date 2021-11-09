@@ -43,30 +43,30 @@ extern Node *root;
 program: stmts;
 
 stmts: { $$ = new ProgramNode("PROG"); root = $$; }
-    | stmts stmt end { (dynamic_cast<ProgramNode*>($1))->addNode($2); }
+    | stmts stmt { (dynamic_cast<ProgramNode*>($1))->addNode($2); }
     ;
 
-stmt: var_decl_stmt { $$ = $1; }
-    | print_stmt { $$ = $1; }
-    | assign_stmt { $$ = $1; }
-    | if_stmt { $$ = $1; }
-    | while_stmt { $$ = $1; }
-    | for_stmt { $$ = $1; }
-    | sub_stmt { $$ = $1; }
-    | call_stmt { $$ = $1; }
+stmt: var_decl_stmt end { $$ = $1; }
+    | print_stmt end { $$ = $1; }
+    | assign_stmt end { $$ = $1; }
+    | if_stmt end { $$ = $1; }
+    | while_stmt end { $$ = $1; }
+    | for_stmt end { $$ = $1; }
+    | sub_stmt end { $$ = $1; }
+    | call_stmt end { $$ = $1; }
     ;
 
 call_stmt: ident LEFT_PAREN RIGHT_PAREN { $$ = new CallNode($1, "CALL", lines); }
     ;
 
-sub_stmt: SUB ident LEFT_PAREN RIGHT_PAREN END block_stmt END_SUB { $$ = new SubNode($2, $6, "SUB", lines); }
+sub_stmt: SUB ident LEFT_PAREN RIGHT_PAREN end block_stmt END_SUB { $$ = new SubNode($2, $6, "SUB", lines); }
     ;
 
-for_stmt: FOR LET ident EQUALS expr TO expr THEN END block_stmt END_FOR { $$ = new ForNode($3, $5, $7, NULL, $10, "FOR", lines); }
-    | FOR LET ident EQUALS expr TO expr STEP expr THEN END block_stmt END_FOR { $$ = new ForNode($3, $5, $7, $9, $12, "FOR", lines); }
+for_stmt: FOR LET ident EQUALS expr TO expr THEN end block_stmt END_FOR { $$ = new ForNode($3, $5, $7, NULL, $10, "FOR", lines);}
+    | FOR LET ident EQUALS expr TO expr STEP expr THEN end block_stmt END_FOR { $$ = new ForNode($3, $5, $7, $9, $12, "FOR", lines); }
     ;
 
-while_stmt: WHILE LEFT_PAREN expr RIGHT_PAREN THEN END block_stmt END_WHILE { $$ = new WhileNode($3, $7, "WHILE", lines); }
+while_stmt: WHILE LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt END_WHILE { $$ = new WhileNode($3, $7, "WHILE", lines); }
     ;
 
 block_stmt: { $$ = new BlockNode("BLOCK", lines); }
@@ -77,11 +77,11 @@ if_stmt: unmatched_if_stmt { $$ = $1; }
     | matched_if_stmt { $$ = $1; }
     ;
 
-unmatched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN END block_stmt END_IF %prec IF_UNMAT { $$ = new IfNode($3, $7, NULL, "IF", lines); }
+unmatched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt END_IF %prec IF_UNMAT { $$ = new IfNode($3, $7, NULL, "IF", lines); }
     ;
 
-matched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN END block_stmt ELSE block_stmt END_IF { $$ = new IfNode($3, $7, $9, "IF", lines); }
-    | IF LEFT_PAREN expr RIGHT_PAREN THEN END block_stmt ELSE if_stmt { $$ = new IfNode($3, $7, $9, "IF", lines); }
+matched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt ELSE block_stmt END_IF { $$ = new IfNode($3, $7, $9, "IF", lines); }
+    | IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt ELSE if_stmt { $$ = new IfNode($3, $7, $9, "IF", lines); }
     ;
 
 var_decl_stmt: VAR ident EQUALS expr { $$ = new VarDeclNode($2, $4, "DECL", lines); };
