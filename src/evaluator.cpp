@@ -58,8 +58,7 @@ Value *ev(Node *root) {
         case NODE_CALL:
             return evCall(dynamic_cast<CallNode*>(root));
         default:
-            std::cout << "UNRECOGNISED NODE" << std::endl;
-            break;
+            return new ErrorValue(root->lineNum, "Unrecognised node type!");
     }
     return NULL;
 }
@@ -161,7 +160,7 @@ Value *evNumberBinaryOp(BinaryOpNode *binaryOp, Value *left, Value *right) {
             return new BoolValue(isEqual(left, right));
         case 'A': // and
             return new BoolValue(isTruthy(left) && isTruthy(right));
-        case 'O':
+        case 'O': // or
             return new BoolValue(isTruthy(left) || isTruthy(right));
         default:
             return new ErrorValue(binaryOp->lineNum, "Unsupported operator between numbers!");
@@ -243,6 +242,7 @@ Value *evIf(IfNode *ifNode) {
             v = ev(ifNode->elseBranch);
         }
     }
+
     if (isError(v)) {
         return v;
     }
