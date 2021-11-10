@@ -9,11 +9,13 @@ Node *root;
 std::map<std::string, Value*> env;
 
 int main(void) {
-    yyparse();
-    ProgramNode *prog = dynamic_cast<ProgramNode*>(root);
-    Value *v = ev(prog);
-    if (v != NULL && v->type == VAL_ERROR) {
-        std::cout << v->stringify() << std::endl;
+    int status = yyparse();
+    if (status == 0) {
+        ProgramNode *prog = dynamic_cast<ProgramNode*>(root);
+        Value *v = ev(prog);
+        if (v != NULL && v->type == VAL_ERROR) {
+            std::cout << v->stringify() << std::endl;
+        }
     }
     return 0;
 }

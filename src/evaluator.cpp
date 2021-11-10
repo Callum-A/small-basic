@@ -227,7 +227,6 @@ Value *evVarAssign(VarAssignNode *varAssign) {
 
 Value *evIdentifier(IdentifierNode *identifier) {
     std::string ident = identifier->ident;
-    // TODO: error if var does not exist
     if (env.find(ident) == env.end()) {
         return new ErrorValue(identifier->lineNum, "Unrecognised variable!");
     }
@@ -276,21 +275,20 @@ Value *evWhile(WhileNode *whileNode) {
 Value *evFor(ForNode *forNode) {
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(forNode->ident);
     std::string ident = identNode->ident;
-    // TODO: check types
     Value *v = ev(forNode->value);
-    if (v->type != VAL_NUMBER) {
+    if (v == NULL || v->type != VAL_NUMBER) {
         return new ErrorValue(forNode->lineNum, "For initialiser must be a number!");
     }
     env[ident] = v;
     Value *max = ev(forNode->max);
-    if (max->type != VAL_NUMBER) {
+    if (max == NULL || max->type != VAL_NUMBER) {
         return new ErrorValue(forNode->lineNum, "For maximum must be a number!");
     }
     NumberValue *v2 = dynamic_cast<NumberValue*>(v);
     NumberValue *max2 = dynamic_cast<NumberValue*>(max);
     if (forNode->step != NULL) {
         Value *step = ev(forNode->step);
-        if (step->type != VAL_NUMBER) {
+        if (step == NULL || step->type != VAL_NUMBER) {
             return new ErrorValue(forNode->lineNum, "For step must be a number!");
         }
         NumberValue *step2 = dynamic_cast<NumberValue*>(step);

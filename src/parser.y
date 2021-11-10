@@ -139,6 +139,6 @@ end: END { lines++; }
 %%
 
 int yyerror(char *s) {
-    //fprintf(stderr, "%s\n", s);
+    fprintf(stderr, "%s at line %d\n", s, lines);
     return 0;
 }
