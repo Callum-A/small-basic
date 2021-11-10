@@ -16,6 +16,8 @@ Value *evWhile(WhileNode *whileNode);
 Value *evFor(ForNode *forNode);
 Value *evSub(SubNode *subNode);
 Value *evCall(CallNode *callNode);
+Value *evExprList(ExprListNode *listNode);
+Value *evIndex(IndexNode *idx);
 
 bool isError(Value *v) {
     if (v != NULL && v->type == VAL_ERROR) {
@@ -57,6 +59,10 @@ Value *ev(Node *root) {
             return evSub(dynamic_cast<SubNode*>(root));
         case NODE_CALL:
             return evCall(dynamic_cast<CallNode*>(root));
+        case NODE_EXPR_LIST:
+            return evExprList(dynamic_cast<ExprListNode*>(root));
+        case NODE_INDEX:
+            return evIndex(dynamic_cast<IndexNode*>(root));
         default:
             return new ErrorValue(root->lineNum, "Unrecognised node type!");
     }
@@ -322,4 +328,28 @@ Value *evCall(CallNode *callNode) {
     std::string ident = identNode->ident;
     SubNode *func = funcs[ident];
     return ev(func->block);
+}
+
+Value *evExprList(ExprListNode *listNode) {
+    ListValue *v = new ListValue();
+    for (int i = 0; i < listNode->exprs.size(); i++) {
+        Node *expr = listNode->exprs[i];
+        Value *eved = ev(expr);
+        // TODO: check if error or null
+        v->addValue(eved);
+    }
+
+    return v;
+}
+
+Value *evIndex(IndexNode *idx) {
+    IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(idx->ident);
+    std::string ident = identNode->ident;
+    Value *v = env[ident];
+    // TODO: check if list or map
+    ListValue *v2 = dynamic_cast<ListValue*>(v);
+    Value *i = ev(idx->index);
+    // TODO: support all value types for map, only number for list
+    NumberValue *i2 = dynamic_cast<NumberValue*>(i);
+    return v2->values[int(i2->number)];
 }

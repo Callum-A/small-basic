@@ -18,6 +18,9 @@ char *duplicateSegment(const char* token, int token_length);
 "/" return DIVIDE;
 "(" return LEFT_PAREN;
 ")" return RIGHT_PAREN;
+"[" return LEFT_BRACKET;
+"]" return RIGHT_BRACKET;
+"," return COMMA;
 "\n" {
     return END;
 }

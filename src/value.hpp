@@ -3,11 +3,13 @@
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 
 enum ValueType {
     VAL_NUMBER,
     VAL_BOOL,
     VAL_STRING,
+    VAL_LIST,
     VAL_ERROR
 };
 
@@ -73,6 +75,41 @@ public:
 
     virtual ~StringValue() {
         free(string);
+    }
+};
+
+class ListValue : public Value {
+public:
+    std::vector<Value*> values;
+    ListValue() : Value(VAL_LIST) {
+
+    }
+
+    void addValue(Value *v) {
+        values.push_back(v);
+    }
+
+    const char *stringify() override {
+        std::string str = "[";
+        for (int i = 0; i < values.size(); i++) {
+            Value *v = values[i];
+            if (i < values.size() - 1) {
+                str = str + v->stringify() + ", ";
+            } else {
+                str = str + v->stringify();
+            }
+        }
+        str += "]";
+        char *tmp = (char *)malloc(str.size() + 1);
+        strcpy(tmp, str.c_str());
+        return tmp;
+    }
+
+    virtual ~ListValue() {
+        for (int i = 0; i < values.size(); i++) {
+            Value *v = values[i];
+            delete v;
+        }
     }
 };
 

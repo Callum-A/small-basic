@@ -23,7 +23,9 @@ enum NodeType {
     NODE_WHILE,
     NODE_FOR,
     NODE_SUB,
-    NODE_CALL
+    NODE_CALL,
+    NODE_EXPR_LIST,
+    NODE_INDEX
 };
 
 class Node {
@@ -307,4 +309,40 @@ public:
     virtual ~CallNode() {
         delete ident;
     }
+};
+
+class ExprListNode : public Node {
+public:
+    std::vector<Node*> exprs;
+
+    ExprListNode(const char *token, int lineNum) : Node(NODE_EXPR_LIST, token, lineNum) {}
+
+    void addNode(Node *expr) {
+        exprs.push_back(expr);
+    }
+
+    virtual ~ExprListNode() {
+        for (int i = 0; i < exprs.size(); i++) {
+            Node *expr = exprs[i];
+            delete expr;
+        }
+    }
+
+};
+
+class IndexNode : public Node {
+public:
+    Node *ident;
+    Node *index;
+
+    IndexNode(Node *ident, Node *index, const char *token, int lineNum) : Node(NODE_INDEX, token , lineNum) {
+        this->ident = ident;
+        this->index = index;
+    }
+
+    virtual ~IndexNode() {
+        delete ident;
+        delete index;
+    }
+
 };

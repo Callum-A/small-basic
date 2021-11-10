@@ -20,6 +20,8 @@ extern Node *root;
 %token VAR IDENT
 %token PLUS MINUS TIMES DIVIDE EQUALS OR AND
 %token LEFT_PAREN RIGHT_PAREN
+%token LEFT_BRACKET RIGHT_BRACKET
+%token COMMA
 %token END
 %token PRINT
 %token EQUALS_EQUALS
@@ -31,7 +33,7 @@ extern Node *root;
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right U_MINUS
-%type<node> program stmts stmt print_stmt assign_stmt expr term factor ident conditional_expr or_expr and_expr equality_expr relational_expr add_expr if_stmt block_stmt unmatched_if_stmt matched_if_stmt while_stmt for_stmt sub_stmt call_stmt
+%type<node> program stmts stmt print_stmt assign_stmt expr term factor ident conditional_expr or_expr and_expr equality_expr relational_expr add_expr if_stmt block_stmt unmatched_if_stmt matched_if_stmt while_stmt for_stmt sub_stmt call_stmt list expr_list expr_list_ext index
 %type<number> NUMBER
 %type<string> STRING
 %type<string> IDENT
@@ -131,6 +133,23 @@ factor: NUMBER { $$ = new NumberNode(yylval.number, "NUM", lines); }
     | FALSE { $$ = new BooleanNode(false, "false", lines); }
     | LEFT_PAREN expr RIGHT_PAREN { $$ = $2; }
     | MINUS expr %prec U_MINUS { $$ = new UnaryOpNode($2, '-', "UNARY", lines); }
+    | index { $$ = $1; }
+    | list { $$ = $1; }
+    ;
+
+index: ident LEFT_BRACKET expr RIGHT_BRACKET { $$ = new IndexNode($1, $3, "INDEX", lines); }
+    ;
+
+list: LEFT_BRACKET expr_list RIGHT_BRACKET { $$ = $2; }
+    ;
+
+expr_list: { $$ = new ExprListNode("LIST", lines); }
+    | expr { $$ = new ExprListNode("LIST", lines); (dynamic_cast<ExprListNode*>($$))->addNode($1); }
+    | expr_list_ext COMMA expr { $$ = $1; (dynamic_cast<ExprListNode*>($$))->addNode($3); }
+    ;
+
+expr_list_ext: expr { $$ = new ExprListNode("LIST", lines); (dynamic_cast<ExprListNode*>($$))->addNode($1); }
+    | expr_list_ext COMMA expr { $$ = $1; (dynamic_cast<ExprListNode*>($$))->addNode($3); }
     ;
 
 end: END { lines++; }
