@@ -137,10 +137,9 @@ public:
         std::string str = "[";
         for (int i = 0; i < values.size(); i++) {
             Value *v = values[i];
+            str = str + v->stringify();
             if (i < values.size() - 1) {
-                str = str + v->stringify() + ", ";
-            } else {
-                str = str + v->stringify();
+                str = str + ", ";
             }
         }
         str += "]";
@@ -200,10 +199,9 @@ public:
         for (auto it = map.begin(); it != map.end(); it++) {
             unsigned int key = it->first;
             Value *val = it->second;
+            str = str + getKeyByHash(key)->stringify() + ": " + val->stringify();
             if (it != endIt) {
-                str = str + getKeyByHash(key)->stringify() + ": " + val->stringify() + ", ";
-            } else {
-                str = str + getKeyByHash(key)->stringify() + ": " + val->stringify();
+                str = str + ", ";
             }
         }
         str += "}";
