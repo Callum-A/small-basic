@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -25,6 +26,7 @@ enum NodeType {
     NODE_SUB,
     NODE_CALL,
     NODE_EXPR_LIST,
+    NODE_MAP,
     NODE_INDEX
 };
 
@@ -325,6 +327,27 @@ public:
         for (int i = 0; i < exprs.size(); i++) {
             Node *expr = exprs[i];
             delete expr;
+        }
+    }
+
+};
+
+class MapNode : public Node {
+public:
+    std::map<Node*, Node*> exprs;
+    MapNode(const char *token, int lineNum) : Node(NODE_MAP, token, lineNum) {}
+
+    void addNode(Node *key, Node *val) {
+        exprs[key] = val;
+    }
+
+    virtual ~MapNode() {
+        std::map<Node*, Node*>::iterator it;
+        for (it = exprs.begin(); it != exprs.end(); it++) {
+            Node *key = it->first;
+            Node *value = it->second;
+            delete key;
+            delete value;
         }
     }
 

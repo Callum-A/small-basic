@@ -21,6 +21,8 @@ extern Node *root;
 %token PLUS MINUS TIMES DIVIDE EQUALS OR AND
 %token LEFT_PAREN RIGHT_PAREN
 %token LEFT_BRACKET RIGHT_BRACKET
+%token LEFT_BRACE RIGHT_BRACE
+%token COLON
 %token COMMA
 %token END
 %token PRINT
@@ -33,7 +35,7 @@ extern Node *root;
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right U_MINUS
-%type<node> program stmts stmt print_stmt assign_stmt expr term factor ident conditional_expr or_expr and_expr equality_expr relational_expr add_expr if_stmt block_stmt unmatched_if_stmt matched_if_stmt while_stmt for_stmt sub_stmt call_stmt list expr_list expr_list_ext index
+%type<node> program stmts stmt print_stmt assign_stmt expr term factor ident conditional_expr or_expr and_expr equality_expr relational_expr add_expr if_stmt block_stmt unmatched_if_stmt matched_if_stmt while_stmt for_stmt sub_stmt call_stmt list expr_list expr_list_ext index map map_list map_list_ext
 %type<number> NUMBER
 %type<string> STRING
 %type<string> IDENT
@@ -135,9 +137,22 @@ factor: NUMBER { $$ = new NumberNode(yylval.number, "NUM", lines); }
     | MINUS expr %prec U_MINUS { $$ = new UnaryOpNode($2, '-', "UNARY", lines); }
     | index { $$ = $1; }
     | list { $$ = $1; }
+    | map { $$ = $1; }
     ;
 
 index: ident LEFT_BRACKET expr RIGHT_BRACKET { $$ = new IndexNode($1, $3, "INDEX", lines); }
+    ;
+
+map: LEFT_BRACE map_list RIGHT_BRACE { $$ = $2; }
+    ;
+
+map_list: { $$ = new MapNode("MAP", lines); }
+    | expr COLON expr { $$ = new MapNode("MAP", lines); (dynamic_cast<MapNode*>($$))->addNode($1, $3); }
+    | map_list_ext COMMA expr COLON expr { $$ = $1; (dynamic_cast<MapNode*>($$))->addNode($3, $5); }
+    ;
+
+map_list_ext: expr COLON expr { $$ = new MapNode("MAP", lines); (dynamic_cast<MapNode*>($$))->addNode($1, $3); }
+    | map_list_ext COMMA expr COLON expr { $$ = $1; (dynamic_cast<MapNode*>($$))->addNode($3, $5); }
     ;
 
 list: LEFT_BRACKET expr_list RIGHT_BRACKET { $$ = $2; }

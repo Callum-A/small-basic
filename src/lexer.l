@@ -20,6 +20,9 @@ char *duplicateSegment(const char* token, int token_length);
 ")" return RIGHT_PAREN;
 "[" return LEFT_BRACKET;
 "]" return RIGHT_BRACKET;
+"{" return LEFT_BRACE;
+"}" return RIGHT_BRACE;
+":" return COLON;
 "," return COMMA;
 "\n" {
     return END;

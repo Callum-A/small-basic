@@ -7,6 +7,7 @@
 int yyparse();
 Node *root;
 std::map<std::string, Value*> env;
+std::map<Value*, int> test;
 
 int main(void) {
     int status = yyparse();

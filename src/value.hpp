@@ -4,14 +4,33 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <map>
+#include <algorithm>
 
 enum ValueType {
     VAL_NUMBER,
     VAL_BOOL,
     VAL_STRING,
     VAL_LIST,
+    VAL_MAP,
     VAL_ERROR
 };
+
+template<class T> struct ptr_less {
+    bool operator()(T* lhs, T* rhs) {
+        return *lhs < *rhs;
+    }
+};
+
+static unsigned int fnv(const char *str) {
+    const size_t length = strlen(str) + 1;
+    unsigned int hash = 2166136261u;
+    for (size_t i = 0; i < length; ++i) {
+        hash ^= *str++;
+        hash *= 16777619u;
+    }
+    return hash;
+}
 
 class Value {
 public:
@@ -23,7 +42,16 @@ public:
 
     virtual void f() {}
 
-    virtual const char *stringify() { return ""; }
+    virtual const char *stringify() const { return ""; }
+
+    virtual const unsigned int hashKey() const {
+        return 0;
+    }
+
+    inline bool operator< (const Value& rhs) const {
+        return this->hashKey() < rhs.hashKey();
+    }
+
 };
 
 class NumberValue : public Value {
@@ -34,11 +62,15 @@ public:
         this->number = number;
     }
 
-    const char *stringify() override {
+    const char *stringify() const override {
         std::string t = std::to_string(number);
         char *str = (char *)malloc(t.size() + 1);
         strcpy(str, t.c_str());
         return str;
+    }
+
+    const unsigned int hashKey() const override {
+        return fnv(this->stringify());
     }
 };
 
@@ -50,11 +82,19 @@ public:
         this->boolean = boolean;
     }
 
-    const char *stringify() override {
+    const char *stringify() const override {
         if (boolean) {
             return "true";
         } else {
             return "false";
+        }
+    }
+
+    const unsigned int hashKey() const override {
+        if (boolean) {
+            return 1;
+        } else {
+            return 0;
         }
     }
 };
@@ -68,13 +108,17 @@ public:
         strcpy(this->string, string);
     }
 
-    const char *stringify() override {
+    const char *stringify() const override {
         // May have to strcpy
         return string;
     }
 
     virtual ~StringValue() {
         free(string);
+    }
+
+    const unsigned int hashKey() const override {
+        return fnv(string);
     }
 };
 
@@ -89,7 +133,7 @@ public:
         values.push_back(v);
     }
 
-    const char *stringify() override {
+    const char *stringify() const override {
         std::string str = "[";
         for (int i = 0; i < values.size(); i++) {
             Value *v = values[i];
@@ -111,6 +155,74 @@ public:
             delete v;
         }
     }
+
+    const unsigned int hashKey() const override {
+        return fnv(this->stringify());
+    }
+};
+
+class MapValue : public Value {
+public:
+    std::vector<Value*> keys;
+    std::map<unsigned int, Value*> map;
+
+    MapValue() : Value(VAL_MAP) {}
+
+    void addValue(Value *key, Value *val) {
+        keys.push_back(key);
+        map[key->hashKey()] = val;
+    }
+
+    void removeValue(Value *key) {
+        keys.erase(std::remove(keys.begin(), keys.end(), key), keys.end());
+        auto it = map.find(key->hashKey());
+        map.erase(it);
+    }
+
+    Value *getValue(Value *key) {
+        return map[key->hashKey()];
+    }
+
+    Value *getKeyByHash(unsigned int hashKey) const {
+        for (int i = 0; i < keys.size(); i++) {
+            Value *v = keys[i];
+            if (v->hashKey() == hashKey) {
+                return v;
+            }
+        }
+        return NULL;
+    }
+
+    const char *stringify() const override {
+        std::string str = "{";
+        auto endIt = map.end();
+        endIt--; // second last ele
+        for (auto it = map.begin(); it != map.end(); it++) {
+            unsigned int key = it->first;
+            Value *val = it->second;
+            if (it != endIt) {
+                str = str + getKeyByHash(key)->stringify() + ": " + val->stringify() + ", ";
+            } else {
+                str = str + getKeyByHash(key)->stringify() + ": " + val->stringify();
+            }
+        }
+        str += "}";
+        char *tmp = (char *)malloc(str.size() + 1);
+        strcpy(tmp, str.c_str());
+        return tmp;
+    }
+
+    virtual ~MapValue() {
+        std::map<unsigned int, Value*>::iterator it;
+        for (it = map.begin(); it != map.end(); it++) {
+            Value *val = it->second;
+            delete val;
+        }
+    }
+
+    const unsigned int hashKey() const override {
+        return fnv(this->stringify());
+    }
 };
 
 class ErrorValue : public Value {
@@ -124,7 +236,7 @@ public:
         strcpy(this->error, error);
     }
 
-    const char *stringify() override {
+    const char *stringify() const override {
         std::string errPrelude = "ERROR AT LINE " + std::to_string(this->lineNum);
         std::string err = errPrelude + ": " + this->error;
         const char *str = err.c_str();
@@ -133,5 +245,9 @@ public:
 
     virtual ~ErrorValue() {
         free(error);
+    }
+
+    const unsigned int hashKey() const override {
+        return fnv(this->stringify());
     }
 };

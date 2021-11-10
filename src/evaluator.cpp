@@ -17,6 +17,7 @@ Value *evFor(ForNode *forNode);
 Value *evSub(SubNode *subNode);
 Value *evCall(CallNode *callNode);
 Value *evExprList(ExprListNode *listNode);
+Value *evMap(MapNode *map);
 Value *evIndex(IndexNode *idx);
 
 bool isError(Value *v) {
@@ -61,6 +62,8 @@ Value *ev(Node *root) {
             return evCall(dynamic_cast<CallNode*>(root));
         case NODE_EXPR_LIST:
             return evExprList(dynamic_cast<ExprListNode*>(root));
+        case NODE_MAP:
+            return evMap(dynamic_cast<MapNode*>(root));
         case NODE_INDEX:
             return evIndex(dynamic_cast<IndexNode*>(root));
         default:
@@ -342,14 +345,34 @@ Value *evExprList(ExprListNode *listNode) {
     return v;
 }
 
+Value *evMap(MapNode *map) {
+    MapValue *mapVal = new MapValue();
+    std::map<Node*, Node*> m = map->exprs;
+    for (auto it = m.begin(); it != m.end(); it++) {
+        Node *key = it->first;
+        Node *val = it->second;
+        Value *k = ev(key); // TODO: check these
+        Value *v = ev(val); // TODO: check these
+        mapVal->addValue(k, v);
+    }
+    return mapVal;
+}
+
 Value *evIndex(IndexNode *idx) {
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(idx->ident);
     std::string ident = identNode->ident;
     Value *v = env[ident];
-    // TODO: check if list or map
-    ListValue *v2 = dynamic_cast<ListValue*>(v);
-    Value *i = ev(idx->index);
-    // TODO: support all value types for map, only number for list
-    NumberValue *i2 = dynamic_cast<NumberValue*>(i);
-    return v2->values[int(i2->number)];
+    if (v->type == VAL_LIST) {
+        ListValue *v2 = dynamic_cast<ListValue*>(v);
+        Value *i = ev(idx->index);
+        // TODO:  only number for list
+        NumberValue *i2 = dynamic_cast<NumberValue*>(i);
+        return v2->values[int(i2->number)];
+    } else if (v->type == VAL_MAP) {
+        MapValue *v2 = dynamic_cast<MapValue*>(v);
+        Value *i = ev(idx->index);
+        return v2->getValue(i);
+    } else {
+        return new ErrorValue(idx->lineNum, "This identifier cannot be indexed!");
+    }
 }
