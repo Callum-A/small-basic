@@ -17,5 +17,6 @@ int main(void) {
             std::cout << v->stringify() << std::endl;
         }
     }
+    delete root;
     return 0;
 }

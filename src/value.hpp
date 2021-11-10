@@ -70,6 +70,10 @@ public:
         // May have to strcpy
         return string;
     }
+
+    virtual ~StringValue() {
+        free(string);
+    }
 };
 
 class ErrorValue : public Value {
@@ -88,5 +92,9 @@ public:
         std::string err = errPrelude + ": " + this->error;
         const char *str = err.c_str();
         return str;
+    }
+
+    virtual ~ErrorValue() {
+        free(error);
     }
 };
