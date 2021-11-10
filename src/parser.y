@@ -35,7 +35,7 @@ extern Node *root;
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right U_MINUS
-%type<node> program stmts stmt print_stmt assign_stmt expr term factor ident conditional_expr or_expr and_expr equality_expr relational_expr add_expr if_stmt block_stmt unmatched_if_stmt matched_if_stmt while_stmt for_stmt sub_stmt call_stmt list expr_list expr_list_ext index map map_list map_list_ext index_assign_stmt
+%type<node> program stmts stmt print_stmt assign_stmt expr term factor ident conditional_expr or_expr and_expr equality_expr relational_expr add_expr if_stmt block_stmt unmatched_if_stmt matched_if_stmt while_stmt for_stmt sub_stmt call_stmt list expr_list expr_list_ext index map map_list map_list_ext index_assign_stmt builtin
 %type<number> NUMBER
 %type<string> STRING
 %type<string> IDENT
@@ -142,6 +142,10 @@ factor: NUMBER { $$ = new NumberNode(yylval.number, "NUM", lines); }
     | index { $$ = $1; }
     | list { $$ = $1; }
     | map { $$ = $1; }
+    | builtin { $$ = $1; }
+    ;
+
+builtin: ident LEFT_PAREN RIGHT_PAREN { $$ = new BuiltInNode($1, "BUILTIN", lines); }
     ;
 
 index: ident LEFT_BRACKET expr RIGHT_BRACKET { $$ = new IndexNode($1, $3, "INDEX", lines); }

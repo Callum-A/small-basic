@@ -1,8 +1,11 @@
 #include "evaluator.hpp"
+#include "builtin.hpp"
 
 extern std::map<std::string, Value*> env;
 // TODO: add funcs as a value type
 std::map<std::string, SubNode*> funcs;
+std::map<std::string, Builtin*> builtins;
+// TODO: add builtins
 
 Value *evProgram(ProgramNode *program);
 Value *evPrint(PrintNode *print);
@@ -20,6 +23,7 @@ Value *evExprList(ExprListNode *listNode);
 Value *evMap(MapNode *map);
 Value *evIndex(IndexNode *idx);
 Value *evIndexAssign(IndexAssignNode *idx);
+Value *evBuiltin(BuiltInNode *b);
 
 bool isError(Value *v) {
     if (v != NULL && v->type == VAL_ERROR) {
@@ -27,6 +31,10 @@ bool isError(Value *v) {
     }
 
     return false;
+}
+
+void registerBuiltins() {
+    builtins["random"] = new Random();
 }
 
 Value *ev(Node *root) {
@@ -69,6 +77,8 @@ Value *ev(Node *root) {
             return evIndex(dynamic_cast<IndexNode*>(root));
         case NODE_INDEX_ASSIGN:
             return evIndexAssign(dynamic_cast<IndexAssignNode*>(root));
+        case NODE_BUILTIN:
+            return evBuiltin(dynamic_cast<BuiltInNode*>(root));
         default:
             return new ErrorValue(root->lineNum, "Unrecognised node type!");
     }
@@ -409,4 +419,12 @@ Value *evIndexAssign(IndexAssignNode *idx) {
     } else {
         return new ErrorValue(idx->lineNum, "This identifier cannot be indexed!");
     }
+}
+
+Value *evBuiltin(BuiltInNode *b) {
+    IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(b->ident);
+    // TODO: add args
+    std::string ident = identNode->ident;
+    Builtin *func = builtins[ident];
+    return func->execute(NULL);
 }

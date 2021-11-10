@@ -28,7 +28,8 @@ enum NodeType {
     NODE_EXPR_LIST,
     NODE_MAP,
     NODE_INDEX_ASSIGN,
-    NODE_INDEX
+    NODE_INDEX,
+    NODE_BUILTIN
 };
 
 class Node {
@@ -389,4 +390,18 @@ public:
         delete index;
     }
 
+};
+
+class BuiltInNode : public Node {
+public:
+    Node *ident;
+    // TODO: add args
+
+    BuiltInNode(Node *ident, const char *token, int lineNum) : Node(NODE_BUILTIN, token, lineNum) {
+        this->ident = ident;
+    }
+
+    virtual ~BuiltInNode() {
+        delete ident;
+    }
 };

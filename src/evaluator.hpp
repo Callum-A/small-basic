@@ -8,3 +8,4 @@
 #include "value.hpp"
 
 Value *ev(Node *root);
+void registerBuiltins();
