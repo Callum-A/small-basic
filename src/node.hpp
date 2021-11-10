@@ -27,6 +27,7 @@ enum NodeType {
     NODE_CALL,
     NODE_EXPR_LIST,
     NODE_MAP,
+    NODE_INDEX_ASSIGN,
     NODE_INDEX
 };
 
@@ -349,6 +350,26 @@ public:
             delete key;
             delete value;
         }
+    }
+
+};
+
+class IndexAssignNode : public Node {
+public:
+    Node *ident;
+    Node *index;
+    Node *value;
+
+    IndexAssignNode(Node *ident, Node *index, Node *value, const char *token, int lineNum) : Node(NODE_INDEX_ASSIGN, token, lineNum) {
+        this->ident = ident;
+        this->index = index;
+        this->value = value;
+    }
+
+    virtual ~IndexAssignNode() {
+        delete ident;
+        delete index;
+        delete value;
     }
 
 };

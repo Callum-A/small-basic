@@ -19,6 +19,7 @@ Value *evCall(CallNode *callNode);
 Value *evExprList(ExprListNode *listNode);
 Value *evMap(MapNode *map);
 Value *evIndex(IndexNode *idx);
+Value *evIndexAssign(IndexAssignNode *idx);
 
 bool isError(Value *v) {
     if (v != NULL && v->type == VAL_ERROR) {
@@ -66,6 +67,8 @@ Value *ev(Node *root) {
             return evMap(dynamic_cast<MapNode*>(root));
         case NODE_INDEX:
             return evIndex(dynamic_cast<IndexNode*>(root));
+        case NODE_INDEX_ASSIGN:
+            return evIndexAssign(dynamic_cast<IndexAssignNode*>(root));
         default:
             return new ErrorValue(root->lineNum, "Unrecognised node type!");
     }
@@ -359,6 +362,7 @@ Value *evMap(MapNode *map) {
 }
 
 Value *evIndex(IndexNode *idx) {
+    // TODO: check if this is ident
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(idx->ident);
     std::string ident = identNode->ident;
     Value *v = env[ident];
@@ -372,6 +376,36 @@ Value *evIndex(IndexNode *idx) {
         MapValue *v2 = dynamic_cast<MapValue*>(v);
         Value *i = ev(idx->index);
         return v2->getValue(i);
+    } else {
+        return new ErrorValue(idx->lineNum, "This identifier cannot be indexed!");
+    }
+}
+
+Value *evIndexAssign(IndexAssignNode *idx) {
+    // TODO: check if this is ident
+    IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(idx->ident);
+    std::string ident = identNode->ident;
+    Value *indexable = env[ident];
+    if (indexable->type == VAL_LIST) {
+        ListValue *v = dynamic_cast<ListValue*>(indexable);
+        Value *i = ev(idx->index);
+        // TODO: check if number
+        NumberValue *i2 = dynamic_cast<NumberValue*>(i);
+        Value *value = ev(idx->value);
+        // TODO: check value type
+        int finalIndex = i2->number;
+        if (finalIndex >= v->values.size() || finalIndex < 0) {
+            return new ErrorValue(idx->lineNum, "Cannot index outside bounds of list, use append instead!");
+        }
+        v->values[finalIndex] = value;
+        return NULL;
+    } else if (indexable->type == VAL_MAP) {
+        MapValue *v = dynamic_cast<MapValue*>(indexable);
+        Value *i = ev(idx->index);
+        Value *value = ev(idx->value);
+        // TODO: Check both types
+        v->addValue(i, value);
+        return NULL;
     } else {
         return new ErrorValue(idx->lineNum, "This identifier cannot be indexed!");
     }
