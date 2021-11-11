@@ -11,6 +11,10 @@ char *duplicateSegment(const char* token, int token_length);
     yylval.number = atoi(yytext); 
     return NUMBER;
 }
+[0-9]*(\.)[0-9]+ {
+    yylval.number = atof(yytext);
+    return NUMBER;
+}
 [\t ] ;
 "+" return PLUS;
 "-" return MINUS;
@@ -63,7 +67,7 @@ char *duplicateSegment(const char* token, int token_length);
     yylval.string = duplicateSegment(yytext + 1, yyleng - 2);
     return STRING;
 }
-[a-z][a-zA-Z]* {
+[a-z][a-zA-Z0-9]* {
     char *copy;
     copy = (char *)malloc(sizeof(char) * (strlen(yytext) + 1));
     strcpy(copy, yytext);
