@@ -20,7 +20,7 @@ public:
         std::getline(std::cin, line);
         char *tmp = (char *)malloc(line.size() + 1);
         strcpy(tmp, line.c_str());
-        return new StringValue("TWAT");
+        return new StringValue("PLACEHOLDER");
     }
 };
 
