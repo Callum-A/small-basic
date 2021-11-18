@@ -10,6 +10,7 @@
 extern int yyparse();
 extern FILE* yyin;
 char *inputFileName;
+char *symbolTableFileName;
 
 Node *root;
 std::map<std::string, Value*> env;
@@ -20,6 +21,12 @@ void parseArguments(int argc, char *argv[]) {
         inputFileName = NULL;
     }
     inputFileName = argv[1];
+
+    if (argc >= 3) {
+        symbolTableFileName = argv[2];
+    } else {
+        symbolTableFileName = NULL;
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -47,6 +54,14 @@ int main(int argc, char *argv[]) {
         delete v;
     }
     // Clean up the AST after we are done
+    if (symbolTableFileName != NULL) {
+        for (auto it = env.begin(); it != env.end(); it++) {
+            std::string name = it->first;
+            Value *v = it->second;
+            // TODO: write to file
+            std::cout << name << ": " << v->stringify() << std::endl;
+        }
+    }
     delete root;
     return 0;
 }
