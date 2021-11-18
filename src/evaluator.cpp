@@ -423,8 +423,20 @@ Value *evIndexAssign(IndexAssignNode *idx) {
 
 Value *evBuiltin(BuiltInNode *b) {
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(b->ident);
-    // TODO: add args
+    ExprListNode *args = dynamic_cast<ExprListNode*>(b->args);
+    std::vector<Value*> valueArgs;
+    for (int i = 0; i < args->exprs.size(); i++) {
+        Node *expr = args->exprs[i];
+        Value *v = ev(expr);
+        if (v == NULL) {
+            return new ErrorValue(b->lineNum, "Cannot have a statement as an arguement!");
+        }
+        if (isError(v)) {
+            return v;
+        }
+        valueArgs.push_back(v);
+    }
     std::string ident = identNode->ident;
     Builtin *func = builtins[ident];
-    return func->execute(NULL);
+    return func->execute(&valueArgs);
 }

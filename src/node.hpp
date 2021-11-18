@@ -395,13 +395,15 @@ public:
 class BuiltInNode : public Node {
 public:
     Node *ident;
-    // TODO: add args
+    Node *args;
 
-    BuiltInNode(Node *ident, const char *token, int lineNum) : Node(NODE_BUILTIN, token, lineNum) {
+    BuiltInNode(Node *ident, Node *args, const char *token, int lineNum) : Node(NODE_BUILTIN, token, lineNum) {
         this->ident = ident;
+        this->args = args;
     }
 
     virtual ~BuiltInNode() {
         delete ident;
+        delete args;
     }
 };

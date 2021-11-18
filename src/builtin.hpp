@@ -28,8 +28,17 @@ class Random : public Builtin {
 public:
     Random() {}
     Value *execute(std::vector<Value*> *args) {
+        if (args->size() != 2) {
+            return new ErrorValue(0, "Expected 2 arguments when calling random!");
+        }
+        Value *mi = (*args)[0];
+        Value *ma = (*args)[1];
+        if (mi->type != VAL_NUMBER || ma->type != VAL_NUMBER) {
+            return new ErrorValue(0, "Expected 2 number values for min and max!");
+        }
+        NumberValue *min = dynamic_cast<NumberValue*>(mi);
+        NumberValue *max = dynamic_cast<NumberValue*>(ma);
         double f = sqrt((double)rand() / RAND_MAX);
-        // TODO: replace with min max args
-        return new NumberValue(0 + f * (1 - 0));
+        return new NumberValue(min->number + f * (max->number - min->number));
     }
 };
