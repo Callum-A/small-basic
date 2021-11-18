@@ -15,7 +15,7 @@ Node *root;
 std::map<std::string, Value*> env;
 
 void parseArguments(int argc, char *argv[]) {
-    if (argc >= 2) {
+    if (argc < 2) {
         std::cout << "ERROR: NO INPUT FILE PROVIDED" << std::endl;
         inputFileName = NULL;
     }
