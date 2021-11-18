@@ -34,6 +34,7 @@ bool isError(Value *v) {
 
 void registerBuiltins() {
     builtins["random"] = new Random();
+    builtins["input"] = new ReadLine();
 }
 
 Value *ev(Node *root) {
