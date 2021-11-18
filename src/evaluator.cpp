@@ -5,7 +5,6 @@ extern std::map<std::string, Value*> env;
 // TODO: add funcs as a value type
 std::map<std::string, SubNode*> funcs;
 std::map<std::string, Builtin*> builtins;
-// TODO: add builtins
 
 Value *evProgram(ProgramNode *program);
 Value *evPrint(PrintNode *print);

@@ -4,14 +4,36 @@
 #include <iostream>
 #include <random>
 #include <time.h>
+#include <string.h>
 #include <map>
 
-int yyparse();
+extern int yyparse();
+extern FILE* yyin;
+char *inputFileName;
+
 Node *root;
 std::map<std::string, Value*> env;
-std::map<Value*, int> test;
 
-int main(void) {
+void parseArguments(int argc, char *argv[]) {
+    if (argc >= 2) {
+        std::cout << "ERROR: NO INPUT FILE PROVIDED" << std::endl;
+        inputFileName = NULL;
+    }
+    inputFileName = argv[1];
+}
+
+int main(int argc, char *argv[]) {
+    parseArguments(argc, argv);
+    if (inputFileName == NULL) {
+        return 1;
+    }
+
+    yyin = fopen(inputFileName, "r");
+    if (yyin == NULL) {
+        std::cout << "ERROR: INPUT FILE COULD NOT BE FOUND!" << std::endl;
+        return 1;
+    }
+
     srand(time(NULL));
     registerBuiltins();
     int status = yyparse();
