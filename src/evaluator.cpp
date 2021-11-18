@@ -32,6 +32,14 @@ bool isError(Value *v) {
     return false;
 }
 
+Value *assertValue(Node *node, Value *v) {
+    if (v == NULL) {
+        return new ErrorValue(node->lineNum, "Expected a value and received NULL!");
+    }
+
+    return v;
+}
+
 void registerBuiltins() {
     builtins["random"] = new Random();
     builtins["input"] = new ReadLine();
@@ -98,7 +106,7 @@ Value *evProgram(ProgramNode *program) {
 }
 
 Value *evPrint(PrintNode *print) {
-    Value *val = ev(print->exp);
+    Value *val = assertValue(print, ev(print->exp));
     if (isError(val)) {
         return val;
     }
@@ -190,7 +198,7 @@ Value *evNumberBinaryOp(BinaryOpNode *binaryOp, Value *left, Value *right) {
 }
 
 Value *evBinaryOp(BinaryOpNode *binaryOp) {
-    Value *left = ev(binaryOp->left);
+    Value *left = assertValue(binaryOp, ev(binaryOp->left));
     Value *right = ev(binaryOp->right);
 
     if (isError(left)) {
@@ -351,7 +359,9 @@ Value *evExprList(ExprListNode *listNode) {
     for (int i = 0; i < listNode->exprs.size(); i++) {
         Node *expr = listNode->exprs[i];
         Value *eved = ev(expr);
-        // TODO: check if error or null
+        if (isError(eved)) {
+            return eved;
+        }
         v->addValue(eved);
     }
 
@@ -364,27 +374,37 @@ Value *evMap(MapNode *map) {
     for (auto it = m.begin(); it != m.end(); it++) {
         Node *key = it->first;
         Node *val = it->second;
-        Value *k = ev(key); // TODO: check these
-        Value *v = ev(val); // TODO: check these
+        Value *k = ev(key);
+        Value *v = ev(val);
+        if (isError(k)) {
+            return k;
+        }
+        if (isError(v)) {
+            return v;
+        }
         mapVal->addValue(k, v);
     }
     return mapVal;
 }
 
 Value *evIndex(IndexNode *idx) {
-    // TODO: check if this is ident
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(idx->ident);
     std::string ident = identNode->ident;
     Value *v = env[ident];
     if (v->type == VAL_LIST) {
         ListValue *v2 = dynamic_cast<ListValue*>(v);
         Value *i = ev(idx->index);
-        // TODO:  only number for list
+        if (i->type != VAL_NUMBER) {
+            return new ErrorValue(idx->lineNum, "Lists are only indexable by numbers!");
+        }
         NumberValue *i2 = dynamic_cast<NumberValue*>(i);
         return v2->values[int(i2->number)];
     } else if (v->type == VAL_MAP) {
         MapValue *v2 = dynamic_cast<MapValue*>(v);
         Value *i = ev(idx->index);
+        if (isError(i)) {
+            return i;
+        }
         return v2->getValue(i);
     } else {
         return new ErrorValue(idx->lineNum, "This identifier cannot be indexed!");
@@ -392,17 +412,20 @@ Value *evIndex(IndexNode *idx) {
 }
 
 Value *evIndexAssign(IndexAssignNode *idx) {
-    // TODO: check if this is ident
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(idx->ident);
     std::string ident = identNode->ident;
     Value *indexable = env[ident];
     if (indexable->type == VAL_LIST) {
         ListValue *v = dynamic_cast<ListValue*>(indexable);
         Value *i = ev(idx->index);
-        // TODO: check if number
+        if (i->type != VAL_NUMBER) {
+            return new ErrorValue(idx->lineNum, "Lists are only indexable by numbers!");
+        }
         NumberValue *i2 = dynamic_cast<NumberValue*>(i);
         Value *value = ev(idx->value);
-        // TODO: check value type
+        if (isError(value)) {
+            return value;
+        }
         int finalIndex = i2->number;
         if (finalIndex >= v->values.size() || finalIndex < 0) {
             return new ErrorValue(idx->lineNum, "Cannot index outside bounds of list, use append instead!");
@@ -413,7 +436,12 @@ Value *evIndexAssign(IndexAssignNode *idx) {
         MapValue *v = dynamic_cast<MapValue*>(indexable);
         Value *i = ev(idx->index);
         Value *value = ev(idx->value);
-        // TODO: Check both types
+        if (isError(i)) {
+            return i;
+        }
+        if (isError(value)) {
+            return value;
+        }
         v->addValue(i, value);
         return NULL;
     } else {
