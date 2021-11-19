@@ -1,12 +1,12 @@
 %{
-#include "node.hpp"
-int yylex();
-int yyerror(char *s);
-int lines = 1;
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include "node.hpp"
 
+int yylex();
+int yyerror(char *s);
+int lines = 1;
 extern Node *root;
 %}
 %union {
@@ -17,31 +17,35 @@ extern Node *root;
 }
 %start program
 %token NUMBER STRING TRUE FALSE
-%token VAR IDENT
-%token PLUS MINUS TIMES DIVIDE EQUALS OR AND
-%token LEFT_PAREN RIGHT_PAREN
-%token LEFT_BRACKET RIGHT_BRACKET
-%token LEFT_BRACE RIGHT_BRACE
-%token COLON
-%token COMMA
-%token END
-%token PRINT
-%token EQUALS_EQUALS
-%token LESS_THAN GREATER_THAN LESS_THAN_EQUALS GREATER_THAN_EQUALS
-%token IF ELSE THEN WHILE FOR LET TO STEP
-%token END_IF END_WHILE END_FOR END_SUB
-%token SUB
+%token VAR IDENT PLUS MINUS
+%token TIMES DIVIDE EQUALS OR AND
+%token LEFT_PAREN RIGHT_PAREN LEFT_BRACKET RIGHT_BRACKET
+%token LEFT_BRACE RIGHT_BRACE COLON COMMA
+%token END PRINT EQUALS_EQUALS LESS_THAN
+%token GREATER_THAN LESS_THAN_EQUALS GREATER_THAN_EQUALS IF
+%token ELSE THEN WHILE FOR 
+%token LET TO STEP END_IF 
+%token SUB END_WHILE END_FOR END_SUB
+
 %right EQUALS
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right U_MINUS
-%type<node> program stmts stmt print_stmt assign_stmt expr term factor ident conditional_expr or_expr and_expr equality_expr relational_expr add_expr if_stmt block_stmt unmatched_if_stmt matched_if_stmt while_stmt for_stmt sub_stmt call_stmt list expr_list expr_list_ext index map map_list map_list_ext index_assign_stmt builtin arg_list arg_list_ext
+%nonassoc IF_UNMAT
+%nonassoc ELSE
+
+%type<node> program stmts stmt print_stmt assign_stmt
+%type<node> expr term factor ident conditional_expr
+%type<node> or_expr and_expr equality_expr relational_expr
+%type<node> add_expr if_stmt block_stmt unmatched_if_stmt 
+%type<node> matched_if_stmt while_stmt for_stmt sub_stmt
+%type<node> call_stmt list expr_list expr_list_ext index
+%type<node> map map_list map_list_ext index_assign_stmt
+%type<node> builtin arg_list arg_list_ext
 %type<number> NUMBER
 %type<string> STRING
 %type<string> IDENT
 %type<boolean> TRUE FALSE
-%nonassoc IF_UNMAT
-%nonassoc ELSE
 %%
 
 program: stmts;
