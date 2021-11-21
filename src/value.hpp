@@ -188,7 +188,7 @@ public:
             Value *val = it->second;
             str = str + key->stringify() + ": " + val->stringify();
             if (it != endIt) {
-                str = str + ", ";
+                str += ", ";
             }
         }
         str += "}";

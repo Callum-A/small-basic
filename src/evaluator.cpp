@@ -464,6 +464,7 @@ Value *evBuiltin(BuiltInNode *b) {
         valueArgs.push_back(v);
     }
     std::string ident = identNode->ident;
+    // TODO: check if builtin actually exists
     Builtin *func = builtins[ident];
-    return func->execute(&valueArgs);
+    return func->execute(b->lineNum, &valueArgs);
 }
