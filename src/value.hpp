@@ -16,12 +16,6 @@ enum ValueType {
     VAL_ERROR
 };
 
-template<class T> struct ptr_less {
-    bool operator()(T* lhs, T* rhs) {
-        return *lhs < *rhs;
-    }
-};
-
 static unsigned int fnv(const char *str) {
     const size_t length = strlen(str) + 1;
     unsigned int hash = 2166136261u;
@@ -44,7 +38,7 @@ public:
 
     virtual const char *stringify() const { return ""; }
 
-    virtual const unsigned int hashKey() const {
+    virtual unsigned int hashKey() const {
         return 0;
     }
 
@@ -69,7 +63,7 @@ public:
         return str;
     }
 
-    const unsigned int hashKey() const override {
+    unsigned int hashKey() const override {
         return fnv(this->stringify());
     }
 };
@@ -90,7 +84,7 @@ public:
         }
     }
 
-    const unsigned int hashKey() const override {
+    unsigned int hashKey() const override {
         if (boolean) {
             return 1;
         } else {
@@ -117,7 +111,7 @@ public:
         free(string);
     }
 
-    const unsigned int hashKey() const override {
+    unsigned int hashKey() const override {
         return fnv(string);
     }
 };
@@ -155,41 +149,34 @@ public:
         }
     }
 
-    const unsigned int hashKey() const override {
+    unsigned int hashKey() const override {
         return fnv(this->stringify());
+    }
+};
+
+struct ValueMap {
+    bool operator()(Value *lhs, Value *rhs) const {
+        return lhs->hashKey() < rhs->hashKey();
     }
 };
 
 class MapValue : public Value {
 public:
-    std::vector<Value*> keys;
-    std::map<unsigned int, Value*> map;
+    std::map<Value*, Value*, ValueMap> map;
 
     MapValue() : Value(VAL_MAP) {}
 
     void addValue(Value *key, Value *val) {
-        keys.push_back(key);
-        map[key->hashKey()] = val;
+        map[key] = val;
     }
 
     void removeValue(Value *key) {
-        keys.erase(std::remove(keys.begin(), keys.end(), key), keys.end());
-        auto it = map.find(key->hashKey());
+        auto it = map.find(key);
         map.erase(it);
     }
 
     Value *getValue(Value *key) {
-        return map[key->hashKey()];
-    }
-
-    Value *getKeyByHash(unsigned int hashKey) const {
-        for (int i = 0; i < keys.size(); i++) {
-            Value *v = keys[i];
-            if (v->hashKey() == hashKey) {
-                return v;
-            }
-        }
-        return NULL;
+        return map[key];
     }
 
     const char *stringify() const override {
@@ -197,9 +184,9 @@ public:
         auto endIt = map.end();
         endIt--; // second last ele
         for (auto it = map.begin(); it != map.end(); it++) {
-            unsigned int key = it->first;
+            Value *key = it->first;
             Value *val = it->second;
-            str = str + getKeyByHash(key)->stringify() + ": " + val->stringify();
+            str = str + key->stringify() + ": " + val->stringify();
             if (it != endIt) {
                 str = str + ", ";
             }
@@ -211,14 +198,15 @@ public:
     }
 
     virtual ~MapValue() {
-        std::map<unsigned int, Value*>::iterator it;
-        for (it = map.begin(); it != map.end(); it++) {
+        for (auto it = map.begin(); it != map.end(); it++) {
+            Value *key = it->first;
             Value *val = it->second;
+            delete key;
             delete val;
         }
     }
 
-    const unsigned int hashKey() const override {
+    unsigned int hashKey() const override {
         return fnv(this->stringify());
     }
 };
@@ -245,7 +233,7 @@ public:
         free(error);
     }
 
-    const unsigned int hashKey() const override {
+    unsigned int hashKey() const override {
         return fnv(this->stringify());
     }
 };
