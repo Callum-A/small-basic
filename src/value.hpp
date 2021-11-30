@@ -237,3 +237,5 @@ public:
         return fnv(this->stringify());
     }
 };
+
+bool isError(Value *v);

@@ -23,14 +23,6 @@ Value *evIndex(IndexNode *idx);
 Value *evIndexAssign(IndexAssignNode *idx);
 Value *evBuiltin(BuiltInNode *b);
 
-bool isError(Value *v) {
-    if (v != NULL && v->type == VAL_ERROR) {
-        return true;
-    }
-
-    return false;
-}
-
 Value *assertValue(Node *node, Value *v) {
     if (v == NULL) {
         return new ErrorValue(node->lineNum, "Expected a value and received NULL!");
