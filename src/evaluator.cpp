@@ -128,6 +128,10 @@ bool isTruthy(Value *v) {
     if (v->type == VAL_BOOL) {
         return dynamic_cast<BoolValue*>(v)->boolean;
     }
+
+    if (v == NULL) {
+        return false;
+    }
     // All other types truthy as we dont have a null
     return true;
 }
@@ -256,7 +260,11 @@ Value *evIdentifier(IdentifierNode *identifier) {
 
 Value *evIf(IfNode *ifNode) {
     Value *v = NULL;
-    if (isTruthy(ev(ifNode->expr))) {
+    v = ev(ifNode->expr);
+    if (isError(v)) {
+        return v;
+    }
+    if (isTruthy(v)) {
         v = ev(ifNode->thenBranch);
     } else {
         if (ifNode->elseBranch != NULL) {

@@ -77,7 +77,7 @@ for_stmt: FOR LET ident EQUALS expr TO expr THEN end block_stmt END_FOR { $$ = n
     | FOR LET ident EQUALS expr TO expr STEP expr THEN end block_stmt END_FOR { $$ = new ForNode($3, $5, $7, $9, $12, "FOR", lines); }
     ;
 
-while_stmt: WHILE LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt END_WHILE { $$ = new WhileNode($3, $7, "WHILE", lines); }
+while_stmt: WHILE expr THEN end block_stmt END_WHILE { $$ = new WhileNode($2, $5, "WHILE", lines); }
     ;
 
 block_stmt: { $$ = new BlockNode("BLOCK", lines); }
@@ -88,11 +88,11 @@ if_stmt: unmatched_if_stmt { $$ = $1; }
     | matched_if_stmt { $$ = $1; }
     ;
 
-unmatched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt END_IF %prec IF_UNMAT { $$ = new IfNode($3, $7, NULL, "IF", lines); }
+unmatched_if_stmt: IF expr THEN end block_stmt END_IF %prec IF_UNMAT { $$ = new IfNode($2, $5, NULL, "IF", lines); }
     ;
 
-matched_if_stmt: IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt ELSE end block_stmt END_IF { $$ = new IfNode($3, $7, $10, "IF", lines); }
-    | IF LEFT_PAREN expr RIGHT_PAREN THEN end block_stmt ELSE if_stmt { $$ = new IfNode($3, $7, $9, "IF", lines); }
+matched_if_stmt: IF expr THEN end block_stmt ELSE end block_stmt END_IF { $$ = new IfNode($2, $5, $8, "IF", lines); }
+    | IF expr THEN end block_stmt ELSE if_stmt { $$ = new IfNode($2, $5, $7, "IF", lines); }
     ;
 
 assign_stmt: ident EQUALS expr { $$ = new VarAssignNode($1, $3, "ASSIGN", lines); };
