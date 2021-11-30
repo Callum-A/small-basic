@@ -26,6 +26,7 @@ extern Node *root;
 %token ELSE THEN WHILE FOR 
 %token LET TO STEP END_IF 
 %token SUB END_WHILE END_FOR END_SUB
+%token DO
 
 %right EQUALS
 %left PLUS MINUS
@@ -73,11 +74,11 @@ call_stmt: ident LEFT_PAREN RIGHT_PAREN { $$ = new CallNode($1, "CALL", lines); 
 sub_stmt: SUB ident LEFT_PAREN RIGHT_PAREN end block_stmt END_SUB { $$ = new SubNode($2, $6, "SUB", lines); }
     ;
 
-for_stmt: FOR LET ident EQUALS expr TO expr THEN end block_stmt END_FOR { $$ = new ForNode($3, $5, $7, NULL, $10, "FOR", lines);}
-    | FOR LET ident EQUALS expr TO expr STEP expr THEN end block_stmt END_FOR { $$ = new ForNode($3, $5, $7, $9, $12, "FOR", lines); }
+for_stmt: FOR LET ident EQUALS expr TO expr DO end block_stmt END_FOR { $$ = new ForNode($3, $5, $7, NULL, $10, "FOR", lines);}
+    | FOR LET ident EQUALS expr TO expr STEP expr DO end block_stmt END_FOR { $$ = new ForNode($3, $5, $7, $9, $12, "FOR", lines); }
     ;
 
-while_stmt: WHILE expr THEN end block_stmt END_WHILE { $$ = new WhileNode($2, $5, "WHILE", lines); }
+while_stmt: WHILE expr DO end block_stmt END_WHILE { $$ = new WhileNode($2, $5, "WHILE", lines); }
     ;
 
 block_stmt: { $$ = new BlockNode("BLOCK", lines); }

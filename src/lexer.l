@@ -39,6 +39,7 @@ char *duplicateSegment(const char* token, int token_length);
 "For"           return FOR;
 "Let"           return LET;
 "To"            return TO;
+"Do"            return DO;
 "Step"          return STEP;
 "Sub"           return SUB;
 "EndSub"        return END_SUB;
