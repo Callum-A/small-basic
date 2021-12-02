@@ -1,6 +1,4 @@
-#include "node.hpp"
-#include "value.hpp"
-#include "evaluator.hpp"
+#include "execute.hpp"
 #include <iostream>
 #include <random>
 #include <time.h>
@@ -10,23 +8,34 @@
 extern int yyparse();
 extern FILE* yyin;
 char *inputFileName;
-char *symbolTableFileName;
+bool runDebug = false;
+bool outputSymbolTable = false;
 
 Node *root;
 std::map<std::string, Value*> env;
 
+// Call interpeter in format ./sb input.sb --debug --sym
 void parseArguments(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "ERROR: NO INPUT FILE PROVIDED" << std::endl;
+        std::cout << "Usage: ./sb inputFile [--debug] [--sym]" << std::endl;
+        std::cout << "    --debug : Run program statement by statement" << std::endl;
+        std::cout << "    --sym   : Output symbol table after execution" << std::endl;
         inputFileName = NULL;
+        return;
     }
     inputFileName = argv[1];
-
-    if (argc >= 3) {
-        symbolTableFileName = argv[2];
-    } else {
-        symbolTableFileName = NULL;
+    if (argc > 2) {
+        for (int i = 2; i < argc; i++) {
+            char *arg = argv[i];
+            if (strcmp(arg, "--debug") == 0) {
+                runDebug = true;
+            } else if (strcmp(arg, "--sym") == 0) {
+                outputSymbolTable = true;
+            }
+        }
     }
+    
 }
 
 int main(int argc, char *argv[]) {
@@ -47,21 +56,9 @@ int main(int argc, char *argv[]) {
     if (status == 0) {
         // Successful parse
         ProgramNode *prog = dynamic_cast<ProgramNode*>(root);
-        Value *v = ev(prog);
-        if (v != NULL && v->type == VAL_ERROR) {
-            std::cout << v->stringify() << std::endl;
-        }
-        delete v;
+        execute(prog, runDebug, outputSymbolTable);
     }
     // Clean up the AST after we are done
-    if (symbolTableFileName != NULL) {
-        for (auto it = env.begin(); it != env.end(); it++) {
-            std::string name = it->first;
-            Value *v = it->second;
-            // TODO: write to file
-            std::cout << name << ": " << v->stringify() << std::endl;
-        }
-    }
     delete root;
     return 0;
 }

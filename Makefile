@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -Wall
 LDFLAGS = 
 SRCFILES = ./src/*.cpp ./src/*.c
-TARGET = ./build/main
+TARGET = ./build/sb
 LEXOUT = ./src/lex.yy.c
 YACCOUT = ./src/y.tab.c ./src/y.tab.h
 
