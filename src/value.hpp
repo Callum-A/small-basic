@@ -42,6 +42,10 @@ public:
         return 0;
     }
 
+    virtual Value *copy() const {
+        return NULL;
+    }
+
     inline bool operator< (const Value& rhs) const {
         return this->hashKey() < rhs.hashKey();
     }
@@ -63,6 +67,10 @@ public:
         return str;
     }
 
+    virtual Value *copy() const {
+        return new NumberValue(this->number);
+    }
+
     unsigned int hashKey() const override {
         return fnv(this->stringify());
     }
@@ -74,6 +82,10 @@ public:
 
     BoolValue(bool boolean) : Value(VAL_BOOL) {
         this->boolean = boolean;
+    }
+
+    virtual Value *copy() const {
+        return new BoolValue(this->boolean);
     }
 
     const char *stringify() const override {
@@ -100,6 +112,10 @@ public:
     StringValue(char *string) : Value(VAL_STRING) {
         this->string = (char *)malloc(strlen(string) + 1);
         strcpy(this->string, string);
+    }
+
+    virtual Value *copy() const {
+        return new StringValue(this->string);
     }
 
     const char *stringify() const override {
@@ -167,7 +183,7 @@ public:
     MapValue() : Value(VAL_MAP) {}
 
     void addValue(Value *key, Value *val) {
-        map[key] = val;
+        map[key->copy()] = val->copy();
     }
 
     void removeValue(Value *key) {
