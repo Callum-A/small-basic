@@ -196,9 +196,13 @@ public:
     }
 
     const char *stringify() const override {
+        if (map.size() == 0) {
+            return "{}";
+        }
         std::string str = "{";
         auto endIt = map.end();
         endIt--; // second last ele
+        
         for (auto it = map.begin(); it != map.end(); it++) {
             Value *key = it->first;
             Value *val = it->second;
