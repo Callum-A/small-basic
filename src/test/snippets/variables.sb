@@ -1,0 +1,10 @@
+a = 10
+b = 10.1
+c = "str"
+d = True
+e = False
+Print(a)
+Print(b)
+Print(c)
+Print(d)
+Print(e)

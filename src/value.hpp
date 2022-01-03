@@ -90,9 +90,9 @@ public:
 
     const char *stringify() const override {
         if (boolean) {
-            return "true";
+            return "True";
         } else {
-            return "false";
+            return "False";
         }
     }
 
