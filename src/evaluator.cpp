@@ -22,6 +22,7 @@ Value *evMap(MapNode *map);
 Value *evIndex(IndexNode *idx);
 Value *evIndexAssign(IndexAssignNode *idx);
 Value *evBuiltin(BuiltInNode *b);
+Value *evExprNode(ExprNode *e);
 
 Value *assertValue(Node *node, Value *v) {
     if (v == NULL) {
@@ -78,6 +79,8 @@ Value *ev(Node *root) {
             return evIndexAssign(dynamic_cast<IndexAssignNode*>(root));
         case NODE_BUILTIN:
             return evBuiltin(dynamic_cast<BuiltInNode*>(root));
+        case NODE_EXPR:
+            return evExprNode(dynamic_cast<ExprNode*>(root));
         default:
             return new ErrorValue(root->lineNum, "Unrecognised node type!");
     }
@@ -467,4 +470,12 @@ Value *evBuiltin(BuiltInNode *b) {
     // TODO: check if builtin actually exists
     Builtin *func = builtins[ident];
     return func->execute(b->lineNum, &valueArgs);
+}
+
+Value *evExprNode(ExprNode *e) {
+    if (e->expr != NULL) {
+        ev(e->expr);
+    }
+
+    return NULL;
 }

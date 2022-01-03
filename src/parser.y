@@ -42,7 +42,7 @@ extern Node *root;
 %type<node> matched_if_stmt while_stmt for_stmt sub_stmt
 %type<node> call_stmt list expr_list expr_list_ext index
 %type<node> map map_list map_list_ext index_assign_stmt
-%type<node> builtin arg_list arg_list_ext
+%type<node> builtin arg_list arg_list_ext expr_stmt
 %type<number> NUMBER
 %type<string> STRING
 %type<string> IDENT
@@ -55,7 +55,9 @@ stmts: { $$ = new ProgramNode("PROG"); root = $$; }
     | stmts stmt { (dynamic_cast<ProgramNode*>($1))->addNode($2); }
     ;
 
-stmt: print_stmt end { $$ = $1; }
+stmt: end { $$ = new ExprNode(NULL, "EMPTY", lines); }
+    | expr_stmt end { $$ = $1; }
+    | print_stmt end { $$ = $1; }
     | assign_stmt end { $$ = $1; }
     | if_stmt end { $$ = $1; }
     | while_stmt end { $$ = $1; }
@@ -63,6 +65,9 @@ stmt: print_stmt end { $$ = $1; }
     | sub_stmt end { $$ = $1; }
     | call_stmt end { $$ = $1; }
     | index_assign_stmt end { $$ = $1; }
+    ;
+
+expr_stmt: expr { $$ = new ExprNode($1, "EXPR", lines); }
     ;
 
 index_assign_stmt: ident LEFT_BRACKET expr RIGHT_BRACKET EQUALS expr { $$ = new IndexAssignNode($1, $3, $6, "INDEX_ASSIGN", lines); }

@@ -29,7 +29,8 @@ enum NodeType {
     NODE_MAP,
     NODE_INDEX_ASSIGN,
     NODE_INDEX,
-    NODE_BUILTIN
+    NODE_BUILTIN,
+    NODE_EXPR
 };
 
 class Node {
@@ -405,5 +406,18 @@ public:
     virtual ~BuiltInNode() {
         delete ident;
         delete args;
+    }
+};
+
+class ExprNode : public Node {
+public:
+    Node *expr;
+
+    ExprNode(Node *expr, const char *token, int lineNum) : Node(NODE_EXPR, token, lineNum) {
+        this->expr = expr;
+    }
+
+    virtual ~ExprNode() {
+        delete expr;
     }
 };
