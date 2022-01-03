@@ -52,10 +52,14 @@ extern Node *root;
 program: stmts;
 
 stmts: { $$ = new ProgramNode("PROG"); root = $$; }
-    | stmts stmt { (dynamic_cast<ProgramNode*>($1))->addNode($2); }
+    | stmts stmt { 
+        if ($2 != NULL) {
+            (dynamic_cast<ProgramNode*>($1))->addNode($2);
+        }
+    }
     ;
 
-stmt: end { $$ = new ExprNode(NULL, "EMPTY", lines); }
+stmt: end { $$ = NULL; }
     | expr_stmt end { $$ = $1; }
     | print_stmt end { $$ = $1; }
     | assign_stmt end { $$ = $1; }
@@ -87,7 +91,11 @@ while_stmt: WHILE expr DO end block_stmt END_WHILE { $$ = new WhileNode($2, $5, 
     ;
 
 block_stmt: { $$ = new BlockNode("BLOCK", lines); }
-    | block_stmt stmt { (dynamic_cast<BlockNode*>($1))->addNode($2); }
+    | block_stmt stmt { 
+        if ($2 != NULL) {
+            (dynamic_cast<BlockNode*>($1))->addNode($2);
+        }
+    }
     ;
 
 if_stmt: unmatched_if_stmt { $$ = $1; }
