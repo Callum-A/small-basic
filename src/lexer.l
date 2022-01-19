@@ -1,11 +1,13 @@
 %{
 #include "node.hpp"
 #include "y.tab.h"
+#include "buffer.hpp"
 #include <cstdlib>
 #include <cstring>
 int yyerror(char *s);
 char *duplicateSegment(const char* token, int token_length);
 %}
+%x str
 %%
 [\t ]           ;
 "+"             return PLUS;
@@ -56,11 +58,15 @@ char *duplicateSegment(const char* token, int token_length);
     return NUMBER;
 }
 
-\"(\\.|[^"\\])*\" {
-    // trim ""
-    yylval.string = duplicateSegment(yytext + 1, yyleng - 2);
-    return STRING;
-}
+\" { BEGIN str; clearBuffer(); }
+<str>[^\\"\n]*   { appendBufferStr(yytext); }
+<str>\\n         { appendBuffer('\n'); }
+<str>\\t         { appendBuffer('\t'); }
+<str>\\[0-7]*    { appendBuffer(strtol(yytext+1, 0, 8)); }
+<str>\\[\\"]     { appendBuffer(yytext[1]); }
+<str>\"          { yylval.string = copyBuffer(); BEGIN 0; return STRING; }
+<str>\\.         { yyerror("bogus escape '%s' in string\n"); }
+<str>\n          { yyerror("newline in string\n"); }
 
 [a-z][a-zA-Z0-9]* {
     char *copy;
