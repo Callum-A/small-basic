@@ -8,6 +8,9 @@ YACCOUT = ./src/y.tab.c ./src/y.tab.h
 
 all: yacc lex main
 
+test:
+	python3 src/test/main.py
+
 lex:
 	flex -o src/lex.yy.c src/lexer.l
 
