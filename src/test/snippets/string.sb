@@ -1,0 +1,6 @@
+Print("abc")
+Print("abc" + "def")
+Print("abc\ndef")
+Print("\"abc\"")
+Print("\tabc")
+Print("\\abc")
