@@ -58,15 +58,16 @@ char *duplicateSegment(const char* token, int token_length);
     return NUMBER;
 }
 
-\" { BEGIN str; clearBuffer(); }
-<str>[^\\"\n]*   { appendBufferStr(yytext); }
-<str>\\n         { appendBuffer('\n'); }
-<str>\\t         { appendBuffer('\t'); }
-<str>\\[0-7]*    { appendBuffer(strtol(yytext+1, 0, 8)); }
-<str>\\[\\"]     { appendBuffer(yytext[1]); }
-<str>\"          { yylval.string = copyBuffer(); BEGIN 0; return STRING; }
-<str>\\.         { yyerror("bogus escape '%s' in string\n"); }
-<str>\n          { yyerror("newline in string\n"); }
+\"                    { BEGIN str; clearBuffer(); }
+<str>[^\\"\n]*        { appendBufferStr(yytext); }
+<str>\\n              { appendBuffer('\n'); }
+<str>\\t              { appendBuffer('\t'); }
+<str>\\[0-7]*         { appendBuffer(strtol(yytext+1, 0, 8)); }
+<str>\\[\\"]          { appendBuffer(yytext[1]); }
+<str>\"               { yylval.string = copyBuffer(); BEGIN 0; return STRING; }
+<str>\\.              { yyerror("Invalid escape sequence in string"); }
+<str>\n               { yyerror("Unterminated string"); }
+<str><<EOF>>          { yyerror("Unterminated string"); }
 
 [a-z][a-zA-Z0-9]* {
     char *copy;
