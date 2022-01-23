@@ -1,0 +1,7 @@
+For Let i = 0 To 10 Do
+    Print(i)
+EndFor
+
+For Let i = 0 To 10 Step 2 Do
+    Print(i)
+EndFor

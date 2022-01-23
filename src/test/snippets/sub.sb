@@ -1,0 +1,7 @@
+Sub addTest()
+    c = a + b
+EndSub
+a = 1
+b = 2
+addTest()
+Print(c)

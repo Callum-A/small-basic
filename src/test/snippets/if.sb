@@ -1,0 +1,16 @@
+If True Then
+    Print("If")
+EndIf
+If False Then
+    Print("...")
+Else
+    Print("Else")
+EndIf
+a = 10
+If a > 10 Then
+    Print("A GT 10")
+Else If a == 10 Then
+    Print("A EQ 10")
+Else
+    Print("A LT 10")
+EndIf
