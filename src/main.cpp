@@ -1,6 +1,7 @@
 #include "execute.hpp"
 #include <iostream>
 #include <random>
+#include <vector>
 #include <time.h>
 #include <string.h>
 #include <map>
@@ -10,6 +11,8 @@ extern FILE* yyin;
 char *inputFileName;
 bool runDebug = false;
 bool outputSymbolTable = false;
+std::vector<int> breakpoints;
+int runUntil = -1; // run until line number
 
 Node *root;
 std::map<std::string, Value*> env;
@@ -18,9 +21,9 @@ std::map<std::string, Value*> env;
 void parseArguments(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "ERROR: NO INPUT FILE PROVIDED" << std::endl;
-        std::cout << "Usage: ./sb inputFile [--debug] [--sym]" << std::endl;
-        std::cout << "    --debug : Run program statement by statement" << std::endl;
-        std::cout << "    --sym   : Output symbol table after execution" << std::endl;
+        std::cout << "Usage: ./sb inputFile [--debug] [--sym] [l1] ... [lN]" << std::endl;
+        std::cout << "    --debug                : Run program statement by statement" << std::endl;
+        std::cout << "    --sym                  : Output symbol table after execution" << std::endl;
         inputFileName = NULL;
         return;
     }
@@ -32,6 +35,11 @@ void parseArguments(int argc, char *argv[]) {
                 runDebug = true;
             } else if (strcmp(arg, "--sym") == 0) {
                 outputSymbolTable = true;
+            } else {
+                int lineNum = (int) atoi(arg);
+                if (lineNum > 0) {
+                    breakpoints.push_back(lineNum);
+                }
             }
         }
     }
@@ -56,7 +64,7 @@ int main(int argc, char *argv[]) {
     if (status == 0) {
         // Successful parse
         ProgramNode *prog = dynamic_cast<ProgramNode*>(root);
-        execute(prog, runDebug, outputSymbolTable);
+        execute(prog, runDebug, outputSymbolTable, &breakpoints);
     }
     // Clean up the AST after we are done
     delete root;
