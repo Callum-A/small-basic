@@ -7,4 +7,4 @@
 #include <algorithm>
 #include <vector>
 
-void execute(ProgramNode *prog, bool debugMode, bool outputSymbolTable, std::vector<int> *breakpoints);
+void execute(ProgramNode *prog, bool outputSymbolTable);

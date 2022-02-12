@@ -2,6 +2,10 @@
 #include "builtin.hpp"
 
 extern std::map<std::string, Value*> env;
+extern bool runDebug;
+extern bool outputSymbolTable;
+extern int breakpoint;
+int currentLineNum = -1;
 std::map<std::string, SubNode*> funcs;
 std::map<std::string, Builtin*> builtins;
 
@@ -32,12 +36,36 @@ Value *assertValue(Node *node, Value *v) {
     return v;
 }
 
+void writeSymbolTable() {
+    std::cout << "-- Symbol Table Start --" << std::endl;
+    for (auto it = env.begin(); it != env.end(); it++) {
+        std::string name = it->first;
+        Value *v = it->second;
+        std::cout << name << ": " << v->stringify() << std::endl;
+    }
+    std::cout << "-- Symbol Table End --" << std::endl;
+}
+
+void debugModeFunc() {
+    if (runDebug || currentLineNum == breakpoint) {
+        if (outputSymbolTable) {
+            writeSymbolTable();
+        }
+
+        std::string input = "";
+        while (input != "NEXT") {
+            std::getline(std::cin, input);
+        }
+    }
+}
+
 void registerBuiltins() {
     builtins["random"] = new Random();
     builtins["input"] = new ReadLine();
 }
 
 Value *ev(Node *root) {
+    currentLineNum = root->lineNum;
     switch (root->type) {
         case NODE_PROGRAM:
             return evProgram(dynamic_cast<ProgramNode*>(root));
@@ -95,6 +123,7 @@ Value *evProgram(ProgramNode *program) {
         if (isError(curr)) {
             return curr;
         }
+        debugModeFunc();
     }
     return NULL;
 }
@@ -290,6 +319,7 @@ Value *evBlock(BlockNode *block) {
         if (isError(v)) {
             return v;
         }
+        debugModeFunc();
     }
     return NULL;
 }

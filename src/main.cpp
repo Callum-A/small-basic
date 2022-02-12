@@ -11,8 +11,9 @@ extern FILE* yyin;
 char *inputFileName;
 bool runDebug = false;
 bool outputSymbolTable = false;
-std::vector<int> breakpoints;
-int runUntil = -1; // run until line number
+int breakpoint = -1;
+// std::vector<int> breakpoints;
+// int runUntil = -1; // run until line number
 
 Node *root;
 std::map<std::string, Value*> env;
@@ -21,7 +22,7 @@ std::map<std::string, Value*> env;
 void parseArguments(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "ERROR: NO INPUT FILE PROVIDED" << std::endl;
-        std::cout << "Usage: ./sb inputFile [--debug] [--sym] [l1] ... [lN]" << std::endl;
+        std::cout << "Usage: ./sb inputFile [--debug] [--sym] [bp]" << std::endl;
         std::cout << "    --debug                : Run program statement by statement" << std::endl;
         std::cout << "    --sym                  : Output symbol table after execution" << std::endl;
         inputFileName = NULL;
@@ -37,9 +38,7 @@ void parseArguments(int argc, char *argv[]) {
                 outputSymbolTable = true;
             } else {
                 int lineNum = (int) atoi(arg);
-                if (lineNum > 0) {
-                    breakpoints.push_back(lineNum);
-                }
+                breakpoint = lineNum;
             }
         }
     }
@@ -64,7 +63,7 @@ int main(int argc, char *argv[]) {
     if (status == 0) {
         // Successful parse
         ProgramNode *prog = dynamic_cast<ProgramNode*>(root);
-        execute(prog, runDebug, outputSymbolTable, &breakpoints);
+        execute(prog, outputSymbolTable);
     }
     // Clean up the AST after we are done
     delete root;
