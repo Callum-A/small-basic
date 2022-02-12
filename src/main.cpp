@@ -12,8 +12,6 @@ char *inputFileName;
 bool runDebug = false;
 bool outputSymbolTable = false;
 int breakpoint = -1;
-// std::vector<int> breakpoints;
-// int runUntil = -1; // run until line number
 
 Node *root;
 std::map<std::string, Value*> env;

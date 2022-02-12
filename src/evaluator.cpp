@@ -382,6 +382,9 @@ Value *evSub(SubNode *subNode) {
 Value *evCall(CallNode *callNode) {
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(callNode->ident);
     std::string ident = identNode->ident;
+    if (funcs.find(ident) == funcs.end()) {
+        return new ErrorValue(callNode->lineNum, "Could not find sub with that identifier");
+    }
     SubNode *func = funcs[ident];
     return ev(func->block);
 }
@@ -497,7 +500,9 @@ Value *evBuiltin(BuiltInNode *b) {
         valueArgs.push_back(v);
     }
     std::string ident = identNode->ident;
-    // TODO: check if builtin actually exists
+    if (builtins.find(ident) == builtins.end()) {
+        return new ErrorValue(b->lineNum, "Could not find builtin with that identifier");
+    }
     Builtin *func = builtins[ident];
     return func->execute(b->lineNum, &valueArgs);
 }
