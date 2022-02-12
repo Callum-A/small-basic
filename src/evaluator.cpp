@@ -47,6 +47,10 @@ void writeSymbolTable() {
 }
 
 void debugModeFunc() {
+    if (runDebug && currentLineNum < breakpoint) {
+        return;
+    }
+    
     if (runDebug || currentLineNum == breakpoint) {
         if (outputSymbolTable) {
             writeSymbolTable();
