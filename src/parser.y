@@ -3,12 +3,12 @@
 #include <cstdio>
 #include <cstring>
 #include "node.hpp"
-
 int yylex();
 int yyerror(char *s);
 int lines = 1;
 extern Node *root;
 %}
+%error-verbose
 %union {
     Node *node;
     double number;

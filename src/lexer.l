@@ -87,7 +87,10 @@ char *duplicateSegment(const char* token, int token_length);
     return FALSE;
 }
 
-. { yyerror("unexpected character."); }
+. {
+    yyerror("unexpected character ");
+    return -1;
+}
 %%
 int yywrap(void) {
     return 1;
