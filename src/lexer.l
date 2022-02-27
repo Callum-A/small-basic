@@ -47,6 +47,7 @@ char *duplicateSegment(const char* token, int token_length);
 "EndSub"        return END_SUB;
 "EndWhile"      return END_WHILE;
 "EndFor"        return END_FOR;
+"'".*           { /* DO NOTHING AS COMMENT */ }
 
 [0-9]+ {
     yylval.number = atoi(yytext); 
