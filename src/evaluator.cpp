@@ -4,7 +4,7 @@
 extern std::map<std::string, Value*> env;
 extern bool runDebug;
 extern bool outputSymbolTable;
-extern int breakpoint;
+extern std::vector<int> breakpoints;
 int currentLineNum = -1;
 std::map<std::string, SubNode*> funcs;
 std::map<std::string, Builtin*> builtins;
@@ -47,11 +47,12 @@ void writeSymbolTable() {
 }
 
 void debugModeFunc() {
-    if (runDebug && currentLineNum < breakpoint) {
+    bool isAtBreakPoint = std::find(breakpoints.begin(), breakpoints.end(), currentLineNum) != breakpoints.end();
+    if (runDebug && !isAtBreakPoint) {
         return;
     }
-    
-    if (runDebug || currentLineNum == breakpoint) {
+
+    if (runDebug || isAtBreakPoint) {
         if (outputSymbolTable) {
             writeSymbolTable();
         }

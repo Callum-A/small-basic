@@ -11,7 +11,7 @@ extern FILE *yyin;
 char *inputFileName;
 bool runDebug = false;
 bool outputSymbolTable = false;
-int breakpoint = -1;
+std::vector<int> breakpoints;
 
 Node *root;
 std::map<std::string, Value*> env;
@@ -36,7 +36,9 @@ void parseArguments(int argc, char *argv[]) {
                 outputSymbolTable = true;
             } else {
                 int lineNum = (int) atoi(arg);
-                breakpoint = lineNum;
+                if (lineNum > 0) {
+                    breakpoints.push_back(lineNum);
+                }
             }
         }
     }
