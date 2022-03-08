@@ -7,7 +7,7 @@
 #include <map>
 
 extern int yyparse();
-extern FILE* yyin;
+extern FILE *yyin;
 char *inputFileName;
 bool runDebug = false;
 bool outputSymbolTable = false;
