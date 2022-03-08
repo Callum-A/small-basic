@@ -20,9 +20,11 @@ std::map<std::string, Value*> env;
 void parseArguments(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "ERROR: NO INPUT FILE PROVIDED" << std::endl;
-        std::cout << "Usage: ./sb inputFile [--debug] [--sym] [bp]" << std::endl;
+        std::cout << "Usage: ./sb inputFile [--debug] [--sym] [breakpoints]" << std::endl;
         std::cout << "    --debug                : Run program statement by statement" << std::endl;
         std::cout << "    --sym                  : Output symbol table after execution" << std::endl;
+        std::cout << "    breakpoints            : A list of line numbers to place breakpoints at for example:" << std::endl;
+        std::cout << "                             1 5 17 would place breakpoints at line 1, 5 and 17 respectively" << std::endl;
         inputFileName = NULL;
         return;
     }
