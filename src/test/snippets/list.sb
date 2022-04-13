@@ -1,0 +1,5 @@
+l = [1, 2, 3]
+Print(l[0])
+Print(l[1])
+Print(l[2])
+Print(l)

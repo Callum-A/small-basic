@@ -12,8 +12,9 @@ for file in TEST_FILES:
     with open(OUTPUTS_PATH + file, "r") as f:
         expected_output = f.read()
     cmd = INTERPRETER_PATH + " " + SNIPPETS_PATH + file
-    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE)
-    output = result.stdout.decode("utf-8")
+    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output = result.stderr.decode("utf-8")
+    output += result.stdout.decode("utf-8")
     try:
         assert output == expected_output
         print("Passed assertion for file " + file)
