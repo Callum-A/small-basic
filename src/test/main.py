@@ -7,6 +7,17 @@ OUTPUTS_PATH = BASE_PATH + "/outputs/"
 INTERPRETER_PATH = BASE_PATH + "/../../build/sb"
 TEST_FILES = os.listdir(SNIPPETS_PATH)
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 for file in TEST_FILES:
     expected_output = ""
     with open(OUTPUTS_PATH + file, "r") as f:
@@ -17,12 +28,12 @@ for file in TEST_FILES:
     output += result.stdout.decode("utf-8")
     try:
         assert output == expected_output
-        print("Passed assertion for file " + file)
+        print(f"{bcolors.OKGREEN}Passed{bcolors.ENDC} assertion for file {file}")
     except Exception as e:
         print(
-            "Failed assertion for file "
+            f"{bcolors.FAIL}Failed{bcolors.ENDC} assertion for file "
             + file
-            + " EXPECTED OUTPUT:\n"
+            + "\nEXPECTED OUTPUT:\n"
             + expected_output
             + "\nACTUAL OUTPUT:\n"
             + output
