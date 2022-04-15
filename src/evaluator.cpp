@@ -67,6 +67,15 @@ void debugModeFunc() {
 void registerBuiltins() {
     builtins["random"] = new Random();
     builtins["input"] = new ReadLine();
+    builtins["floor"] = new Floor();
+    builtins["ceil"] = new Ceil();
+    builtins["pi"] = new Pi();
+    builtins["readfile"] = new ReadFile();
+    builtins["len"] = new Len();
+    builtins["sqrt"] = new Sqrt();
+    builtins["cos"] = new Cos();
+    builtins["sin"] = new Sin();
+    builtins["tan"] = new Tan();
 }
 
 Value *ev(Node *root) {

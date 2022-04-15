@@ -109,7 +109,7 @@ class StringValue : public Value {
 public:
     char *string;
 
-    StringValue(char *string) : Value(VAL_STRING) {
+    StringValue(const char *string) : Value(VAL_STRING) {
         this->string = (char *)malloc(strlen(string) + 1);
         strcpy(this->string, string);
     }
