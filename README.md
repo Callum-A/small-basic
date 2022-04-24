@@ -34,3 +34,11 @@ Here is some example usages:
 # All flags at once
 ./build/sb path_to_file.sb --debug --sym 1 2 3
 ```
+
+## Run Tests
+
+Ensure a Small Basic executale is located in the `build` folder and then
+run the following command from the project root.
+```shell
+python ./src/test/main.py
+```
