@@ -40,5 +40,8 @@ Here is some example usages:
 Ensure a Small Basic executale is located in the `build` folder and then
 run the following command from the project root.
 ```shell
+# Directly
 python ./src/test/main.py
+# Via make file
+make test
 ```
