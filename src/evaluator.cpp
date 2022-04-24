@@ -1,13 +1,16 @@
 #include "evaluator.hpp"
 #include "builtin.hpp"
 
-extern std::map<std::string, Value*> env;
-extern bool runDebug;
-extern bool outputSymbolTable;
-extern std::vector<int> breakpoints;
+// External dependencies
+extern std::map<std::string, Value*> env; // Variables
+extern bool runDebug;                     // Debug run
+extern bool outputSymbolTable;            // Output the symbol table
+extern std::vector<int> breakpoints;      // List of breakpoints
+
+// Global helpers
 int currentLineNum = -1;
-std::map<std::string, SubNode*> funcs;
-std::map<std::string, Builtin*> builtins;
+std::map<std::string, SubNode*> funcs;    // User defined subroutines
+std::map<std::string, Builtin*> builtins; // Small Basic standard lib
 
 Value *evProgram(ProgramNode *program);
 Value *evPrint(PrintNode *print);
@@ -28,6 +31,7 @@ Value *evIndexAssign(IndexAssignNode *idx);
 Value *evBuiltin(BuiltInNode *b);
 Value *evExprNode(ExprNode *e);
 
+/// Assert that the value pointer given is not NULL
 Value *assertValue(Node *node, Value *v) {
     if (v == NULL) {
         return new ErrorValue(node->lineNum, "Expected a value and received NULL!");
@@ -36,6 +40,7 @@ Value *assertValue(Node *node, Value *v) {
     return v;
 }
 
+/// Helper to print the symbol table to stdout
 void writeSymbolTable() {
     std::cout << "-- Symbol Table Start --" << std::endl;
     for (auto it = env.begin(); it != env.end(); it++) {
@@ -46,6 +51,8 @@ void writeSymbolTable() {
     std::cout << "-- Symbol Table End --" << std::endl;
 }
 
+/// Debug mode function to pause and wait for user input at
+/// breakpoints
 void debugModeFunc() {
     bool isAtBreakPoint = std::find(breakpoints.begin(), breakpoints.end(), currentLineNum) != breakpoints.end();
     if (runDebug && !isAtBreakPoint) {
@@ -64,6 +71,7 @@ void debugModeFunc() {
     }
 }
 
+/// Helper to register all the standard library
 void registerBuiltins() {
     builtins["random"] = new Random();
     builtins["input"] = new ReadLine();
@@ -78,6 +86,8 @@ void registerBuiltins() {
     builtins["tan"] = new Tan();
 }
 
+/// Root entry point, takes a given node checks its type and evaluates
+/// it accordingly. Sets currentLineNum.
 Value *ev(Node *root) {
     currentLineNum = root->lineNum;
     switch (root->type) {
@@ -129,6 +139,8 @@ Value *ev(Node *root) {
     return NULL;
 }
 
+/// Helper function to evaluate a program node.
+/// Simply evaluates every statement contained in the node.
 Value *evProgram(ProgramNode *program) {
     std::vector<Node*> *stmts = program->getStmts();
     for (int i = 0; i < stmts->size(); i++) {
@@ -142,6 +154,8 @@ Value *evProgram(ProgramNode *program) {
     return NULL;
 }
 
+/// Helper function to evaluate a print node.
+/// Simply prints the expr value to stdout.
 Value *evPrint(PrintNode *print) {
     Value *val = assertValue(print, ev(print->exp));
     if (isError(val)) {
@@ -151,6 +165,8 @@ Value *evPrint(PrintNode *print) {
     return NULL;
 }
 
+/// Helper to check for equality across SmallBasic
+/// values. Returns true if they are equal.
 bool isEqual(Value *left, Value *right) {
     if (left->type != right->type) {
         return false;
@@ -170,6 +186,8 @@ bool isEqual(Value *left, Value *right) {
     return false;
 }
 
+/// Helper to check if a value is truthy.
+/// AKA a value evaluates to true.
 bool isTruthy(Value *v) {
     if (v->type == VAL_BOOL) {
         return dynamic_cast<BoolValue*>(v)->boolean;
@@ -182,6 +200,8 @@ bool isTruthy(Value *v) {
     return true;
 }
 
+/// Helper to evaluate the valid binary ops between strings.
+/// Handles all error cases.
 Value *evStringBinaryOp(BinaryOpNode *binaryOp, Value *left, Value *right) {
     if (right->type != VAL_STRING) {
         return new ErrorValue(binaryOp->lineNum, "Expected string for right operand as left is string.");
@@ -205,6 +225,8 @@ Value *evStringBinaryOp(BinaryOpNode *binaryOp, Value *left, Value *right) {
     }
 }
 
+/// Helper to evaluate the valid binary ops between numbers.
+/// Handles all error cases.
 Value *evNumberBinaryOp(BinaryOpNode *binaryOp, Value *left, Value *right) {
     if (right->type != VAL_NUMBER) {
         return new ErrorValue(binaryOp->lineNum, "Expected number for right operand as left is number.");
@@ -238,6 +260,7 @@ Value *evNumberBinaryOp(BinaryOpNode *binaryOp, Value *left, Value *right) {
     }
 }
 
+/// Evaluates all binary operations between two values.
 Value *evBinaryOp(BinaryOpNode *binaryOp) {
     Value *left = assertValue(binaryOp, ev(binaryOp->left));
     Value *right = ev(binaryOp->right);
@@ -268,6 +291,7 @@ Value *evBinaryOp(BinaryOpNode *binaryOp) {
     }
 }
 
+/// Evaluates all unary operations on a value.
 Value *evUnaryOp(UnaryOpNode *unaryOp) {
     Value *right = ev(unaryOp->right);
     if (right->type != VAL_NUMBER) {
@@ -284,6 +308,8 @@ Value *evUnaryOp(UnaryOpNode *unaryOp) {
     return NULL;
 }
 
+/// Evaluates a variable assignment node setting
+/// its value in the env map on success.
 Value *evVarAssign(VarAssignNode *varAssign) {
     std::string ident = dynamic_cast<IdentifierNode*>(varAssign->ident)->ident;
     Value *v = ev(varAssign->value);
@@ -295,6 +321,8 @@ Value *evVarAssign(VarAssignNode *varAssign) {
     return NULL;
 }
 
+/// Evaluates an identifier node looking up its value
+/// in the variable map.
 Value *evIdentifier(IdentifierNode *identifier) {
     std::string ident = identifier->ident;
     if (env.find(ident) == env.end()) {
@@ -304,6 +332,8 @@ Value *evIdentifier(IdentifierNode *identifier) {
     return v;
 }
 
+/// Evaluates an if statement, processing the expr
+/// and handling what branch to execute accordingly.
 Value *evIf(IfNode *ifNode) {
     Value *v = NULL;
     v = ev(ifNode->expr);
@@ -325,6 +355,8 @@ Value *evIf(IfNode *ifNode) {
     return NULL;
 }
 
+/// Evaluates a block statement, simply iterates
+/// over contained statements and executes each.
 Value *evBlock(BlockNode *block) {
     std::vector<Node*> *stmts = block->getStmts();
     for (int i = 0; i < stmts->size(); i++) {
@@ -338,6 +370,8 @@ Value *evBlock(BlockNode *block) {
     return NULL;
 }
 
+/// Evaluate a while statement, while the expr
+/// is true evaluate the block.
 Value *evWhile(WhileNode *whileNode) {
     while(isTruthy(ev(whileNode->expr))) {
         Value *v = ev(whileNode->block);
@@ -348,6 +382,8 @@ Value *evWhile(WhileNode *whileNode) {
     return NULL;
 }
 
+/// Evaluate both types of for statements, handling
+/// the increment and stop conditions.
 Value *evFor(ForNode *forNode) {
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(forNode->ident);
     std::string ident = identNode->ident;
@@ -386,6 +422,8 @@ Value *evFor(ForNode *forNode) {
     return NULL;
 }
 
+/// Evaluate a subroutine definition node storing the 
+/// subroutine in the funcs map.
 Value *evSub(SubNode *subNode) {
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(subNode->ident);
     std::string ident = identNode->ident;
@@ -393,6 +431,8 @@ Value *evSub(SubNode *subNode) {
     return NULL;
 }
 
+/// Evaluate a subroutine call node, simply evaluates
+/// the subroutine's block.
 Value *evCall(CallNode *callNode) {
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(callNode->ident);
     std::string ident = identNode->ident;
@@ -403,6 +443,8 @@ Value *evCall(CallNode *callNode) {
     return ev(func->block);
 }
 
+/// Evaluate a list of expressions, returning them as
+/// a Small Basic ListValue.
 Value *evExprList(ExprListNode *listNode) {
     ListValue *v = new ListValue();
     for (int i = 0; i < listNode->exprs.size(); i++) {
@@ -417,6 +459,8 @@ Value *evExprList(ExprListNode *listNode) {
     return v;
 }
 
+/// Evaluate a map node, storing them in a 
+/// Small Basic MapValue.
 Value *evMap(MapNode *map) {
     MapValue *mapVal = new MapValue();
     std::map<Node*, Node*> m = map->exprs;
@@ -436,6 +480,8 @@ Value *evMap(MapNode *map) {
     return mapVal;
 }
 
+/// Evaluate an index node, looking up the
+/// identifier and then seeing if it is indexable.
 Value *evIndex(IndexNode *idx) {
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(idx->ident);
     std::string ident = identNode->ident;
@@ -460,6 +506,9 @@ Value *evIndex(IndexNode *idx) {
     }
 }
 
+/// Evaluate an index assign node, looking up the
+/// identifier, checking if it is indexable and then
+/// setting accordingly.
 Value *evIndexAssign(IndexAssignNode *idx) {
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(idx->ident);
     std::string ident = identNode->ident;
@@ -498,6 +547,9 @@ Value *evIndexAssign(IndexAssignNode *idx) {
     }
 }
 
+/// Evaluate a builtin standard library call node
+/// Gathers the arguements, looks up the builtin 
+/// and then returns the value.
 Value *evBuiltin(BuiltInNode *b) {
     IdentifierNode *identNode = dynamic_cast<IdentifierNode*>(b->ident);
     ExprListNode *args = dynamic_cast<ExprListNode*>(b->args);
@@ -521,6 +573,8 @@ Value *evBuiltin(BuiltInNode *b) {
     return func->execute(b->lineNum, &valueArgs);
 }
 
+/// Evaluate an expression node, simply evaluate the contained
+/// expression.
 Value *evExprNode(ExprNode *e) {
     if (e->expr != NULL) {
         ev(e->expr);

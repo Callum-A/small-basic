@@ -7,6 +7,9 @@
 #include <map>
 #include <algorithm>
 
+/// Enum containing all the different value types
+/// so that value types can be identified prior
+/// to casting.
 enum ValueType {
     VAL_NUMBER,
     VAL_BOOL,
@@ -16,6 +19,8 @@ enum ValueType {
     VAL_ERROR
 };
 
+/// Helper hash function to hash values to an integer,
+/// (used for maps).
 static unsigned int fnv(const char *str) {
     const size_t length = strlen(str) + 1;
     unsigned int hash = 2166136261u;
@@ -26,6 +31,8 @@ static unsigned int fnv(const char *str) {
     return hash;
 }
 
+/// Abstract value class to be inheritted from.
+/// Represents a value in Small Basic.
 class Value {
 public:
     ValueType type;
@@ -52,6 +59,8 @@ public:
 
 };
 
+/// Class representing a number value in Small Basic.
+/// Returns the raw double number.
 class NumberValue : public Value {
 public:
     double number;
@@ -76,6 +85,8 @@ public:
     }
 };
 
+/// Class representing a boolean value in Small Basic.
+/// Stores the raw bool value.
 class BoolValue : public Value {
 public:
     bool boolean;
@@ -105,6 +116,8 @@ public:
     }
 };
 
+/// Class representing a string value in Small Basic.
+/// Stores the raw char* value.
 class StringValue : public Value {
 public:
     char *string;
@@ -132,6 +145,8 @@ public:
     }
 };
 
+/// Class representing a list in Small Basic.
+/// Stores a vector of values.
 class ListValue : public Value {
 public:
     std::vector<Value*> values;
@@ -170,12 +185,16 @@ public:
     }
 };
 
+/// Helper struct used to define how to determine keys are
+/// equal for Value*
 struct ValueMap {
     bool operator()(Value *lhs, Value *rhs) const {
         return lhs->hashKey() < rhs->hashKey();
     }
 };
 
+/// Class representing a map in SmallBasic
+/// Contains a C++ map of values.
 class MapValue : public Value {
 public:
     std::map<Value*, Value*, ValueMap> map;

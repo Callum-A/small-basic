@@ -7,12 +7,16 @@
 #include <random>
 #include <fstream>
 
+/// Abstract builtin class for an inbuilt
+/// Small Basic function. Can take arguments.
 class Builtin {
 public:
     Builtin() {}
     virtual Value *execute(int lineNum, std::vector<Value*> *args) { return NULL; };
 };
 
+/// Read a line from stdin and return it as
+/// a Small Basic StringValue.
 class ReadLine : public Builtin {
 public:
     ReadLine() {}
@@ -28,6 +32,8 @@ public:
     }
 };
 
+/// Generate a random number and return it is a
+/// Small BAsic NumberValue.
 class Random : public Builtin {
 public:
     Random() {}
@@ -47,6 +53,7 @@ public:
     }
 };
 
+/// Floor a given number.
 class Floor : public Builtin {
 public:
     Floor() {}
@@ -64,6 +71,7 @@ public:
     }
 };
 
+/// Ceil a given number.
 class Ceil : public Builtin {
 public:
     Ceil() {}
@@ -81,6 +89,7 @@ public:
     }
 };
 
+/// Return the value for pi
 class Pi : public Builtin {
 public:
     Pi() {}
@@ -92,6 +101,7 @@ public:
     }
 };
 
+/// Sqrt a given number
 class Sqrt : public Builtin {
 public:
     Sqrt() {}
@@ -109,6 +119,7 @@ public:
     }
 };
 
+/// Calculate the cos for a given value
 class Cos : public Builtin {
 public:
     Cos() {}
@@ -126,6 +137,7 @@ public:
     }
 };
 
+/// Calculate the sin for a given value
 class Sin : public Builtin {
 public:
     Sin() {}
@@ -143,6 +155,7 @@ public:
     }
 };
 
+/// Calculate the tan for a given value
 class Tan : public Builtin {
 public:
     Tan() {}
@@ -160,6 +173,8 @@ public:
     }
 };
 
+/// Read a specified file into a Small Basic
+/// ListValue of StringValues
 class ReadFile : public Builtin {
 public:
     ReadFile() {}
@@ -190,6 +205,7 @@ public:
     }
 };
 
+/// Returns the length of a Small Basic value
 class Len : public Builtin {
 public:
     Len() {}

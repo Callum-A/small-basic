@@ -1,7 +1,8 @@
 #include "execute.hpp"
 
-extern std::map<std::string, Value*> env;
+extern std::map<std::string, Value*> env; // Variable map
 
+/// Helper to write the symbol table.
 void writeSymTable() {
     std::cout << "-- Symbol Table Start --" << std::endl;
     for (auto it = env.begin(); it != env.end(); it++) {
@@ -12,6 +13,7 @@ void writeSymTable() {
     std::cout << "-- Symbol Table End --" << std::endl;
 }
 
+// Execute a program.
 void execute(ProgramNode *prog, bool outputSymbolTable) {
     Value *v = ev(prog);
     if (isError(v)) {

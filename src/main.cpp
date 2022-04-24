@@ -16,7 +16,7 @@ std::vector<int> breakpoints;
 Node *root;
 std::map<std::string, Value*> env;
 
-// Call interpeter in format ./sb input.sb --debug --sym
+/// Call interpeter in format ./sb input.sb --debug --sym
 void parseArguments(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "ERROR: NO INPUT FILE PROVIDED" << std::endl;
@@ -47,6 +47,7 @@ void parseArguments(int argc, char *argv[]) {
     
 }
 
+/// Main entrypoint
 int main(int argc, char *argv[]) {
     parseArguments(argc, argv);
     if (inputFileName == NULL) {

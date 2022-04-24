@@ -1,12 +1,16 @@
 #include <cstring>
 #include <cstdlib>
 
-static char *str;
+static char *str; // The string currntly being built
 
+/// Clear the current string being built to a
+/// blank string.
 void clearBuffer() {
     str = "";
 }
 
+/// Add a character to the string buffer
+/// handles string resizing.
 void appendBuffer(char c) {
     int currentLen = strlen(str);
     int lenWithNullTerminator = currentLen + 1;
@@ -19,6 +23,8 @@ void appendBuffer(char c) {
     str = newStr;
 }
 
+/// Append a series of characters to the
+/// string buffer, handles string resizing.
 void appendBufferStr(char *str2) {
     int currentLen = strlen(str);
     int lenWithNullTerminator = currentLen + 1;
@@ -29,6 +35,7 @@ void appendBufferStr(char *str2) {
     str = result;
 }
 
+/// Return a deep copy of the current buffer.
 char *copyBuffer() {
     char *copy = (char *)malloc(sizeof(char) * (strlen(str) + 1));
     strcpy(copy, str);

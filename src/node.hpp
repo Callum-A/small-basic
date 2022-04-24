@@ -8,6 +8,10 @@
 
 #include "value.hpp"
 
+/// Enum containing every distinct node type
+/// contained in the abstract node class
+/// to safely identify node types prior
+/// to casting
 enum NodeType {
     NODE_PROGRAM,
     NODE_NUMBER,
@@ -33,11 +37,12 @@ enum NodeType {
     NODE_EXPR
 };
 
+/// Abstract node class containg information needed for all nodes.
 class Node {
 public:
-    NodeType type;
-    char *token;
-    int lineNum;
+    NodeType type; // The type of node.
+    char *token;   // Debug string helper to help identify nodes when printing.
+    int lineNum;   // What line this node is on.
 
     Node(NodeType type, const char *token, int lineNum) {
         this->type = type;
@@ -53,6 +58,8 @@ public:
     virtual void f() {}
 };
 
+/// Node representing the whole program. Simply a list of
+/// statements in order.
 class ProgramNode : public Node {
 public:
     ProgramNode(const char *token) : Node(NODE_PROGRAM, token, 0) {
@@ -74,6 +81,8 @@ private:
     std::vector<Node*> stmts;
 };
 
+/// Node representing a number value,
+/// simply contains the corresponding number value.
 class NumberNode : public Node {
 public:
     NumberValue *value;
@@ -87,6 +96,8 @@ public:
     }
 };
 
+/// Node representing a boolean value,
+/// simply contains the corresponding bool value.
 class BooleanNode : public Node {
 public:
     BoolValue *value;
@@ -100,6 +111,8 @@ public:
     }
 };
 
+/// Node representing a string value,
+/// simply contains the corresponding string value.
 class StringNode : public Node {
 public:
     StringValue *value;
@@ -113,6 +126,8 @@ public:
     }
 };
 
+/// Node representing an identifier,
+/// contains the raw char* ident.
 class IdentifierNode : public Node {
 public:
     char *ident;
@@ -127,6 +142,8 @@ public:
     }
 };
 
+/// Node representing a print call.
+/// Contains the expression to be printed.
 class PrintNode : public Node {
 public:
     Node *exp;
@@ -140,6 +157,8 @@ public:
     }
 };
 
+/// Node for a binary operation.
+/// Contains the operator, left and right.
 class BinaryOpNode : public Node {
 public:
     char op;
@@ -158,6 +177,8 @@ public:
     }
 };
 
+/// Node for a unary operation.
+/// Contains the operator and the right side.
 class UnaryOpNode : public Node {
 public:
     char op;
@@ -173,6 +194,9 @@ public:
     }
 };
 
+/// Node for a var declaration, contains the
+/// identifier node and the value node.
+/// ident = value
 class VarDeclNode : public Node {
 public:
     Node *ident;
@@ -189,6 +213,9 @@ public:
     }
 };
 
+/// Node for a var assignment contains the
+/// identifier node and valye node.
+/// ident = value
 class VarAssignNode : public Node {
 public:
     Node *ident;
@@ -205,6 +232,8 @@ public:
     }
 };
 
+/// Node for a block of statements.
+/// Contains a list of other nodes within the block.
 class BlockNode : public Node {
 public:
     BlockNode(const char *token, int lineNum) : Node(NODE_BLOCK, token, lineNum) {}
@@ -226,6 +255,10 @@ private:
     std::vector<Node*> stmts;
 };
 
+/// Node for an if statement.
+/// Contains the expression, then then branch
+/// (executed when true) and the optional else branch
+/// (executed when false but can be NULL)
 class IfNode : public Node {
 public:
     Node *expr;
@@ -245,6 +278,9 @@ public:
     }
 };
 
+/// Node for a while statement.
+/// Contains the expression and the 
+/// block node to be executed when it is true.
 class WhileNode : public Node {
 public:
     Node *expr;
@@ -261,6 +297,11 @@ public:
     }
 };
 
+/// Node for a for statement.
+/// Contains the identifier used,
+/// the start value, the max value (stop condition),
+/// the step (increment) and the block to be executed.
+/// For Let ident = value To max Step step Do block
 class ForNode : public Node {
 public:
     Node *ident;
@@ -287,6 +328,9 @@ public:
 
 };
 
+/// Node for subroutine definition.
+/// Contains the subroutine's ident
+/// and the block to be executed when called.
 class SubNode : public Node {
 public:
     Node *ident;
@@ -303,6 +347,8 @@ public:
     }
 };
 
+/// Node for a subroutine call
+/// Stores the ident of the sub called.
 class CallNode : public Node {
 public:
     Node *ident;
@@ -316,6 +362,8 @@ public:
     }
 };
 
+/// Node representing a list of expressions.
+/// Contains a list of other nodes.
 class ExprListNode : public Node {
 public:
     std::vector<Node*> exprs;
@@ -335,6 +383,8 @@ public:
 
 };
 
+/// Node representing a map.
+/// Contains node key value pairs.
 class MapNode : public Node {
 public:
     std::map<Node*, Node*> exprs;
@@ -356,6 +406,11 @@ public:
 
 };
 
+/// Node for index assignment.
+/// Contains the ident of the variable,
+/// the index value and the value it is
+/// being set to.
+/// ident[index] = value
 class IndexAssignNode : public Node {
 public:
     Node *ident;
@@ -376,6 +431,8 @@ public:
 
 };
 
+/// Node for an index retrieval.
+/// ident[index]
 class IndexNode : public Node {
 public:
     Node *ident;
@@ -393,6 +450,9 @@ public:
 
 };
 
+/// Node representing a builtin standard library
+/// function call. Contains the identifier for it
+/// and the arguements it is called with.
 class BuiltInNode : public Node {
 public:
     Node *ident;
@@ -409,6 +469,8 @@ public:
     }
 };
 
+/// Node representing an expression.
+/// Contains the expression.
 class ExprNode : public Node {
 public:
     Node *expr;
