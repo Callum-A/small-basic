@@ -28,6 +28,12 @@ for file in TEST_FILES:
     output += result.stdout.decode("utf-8")
     try:
         assert output == expected_output
+        print(f" - Start Test for {file} - ")
+        print(f" --- ACTUAL OUTPUT --- ")
+        print(output)
+        print(f" --- EXPECTED OUTPUT ---")
+        print(expected_output)
+        print(" --------------------- ")
         print(f"{bcolors.OKGREEN}Passed{bcolors.ENDC} assertion for file {file}")
     except Exception as e:
         print(
